@@ -1,0 +1,17 @@
+#!/usr/bin/env ruby
+
+require 'rubygems'
+require 'bundler/setup'
+
+require 'irb'
+require 'rails'
+require 'active_record'
+require 'timescaledb/rails'
+
+ActiveRecord::Base.establish_connection(ENV.fetch('DATABASE_URL', 'postgres://postgres:postgres@127.0.0.1/timescaledb-rails_test'))
+
+require 'timescaledb/rails/models'
+
+IRB.conf[:PROMPT_MODE] = :SIMPLE
+
+IRB.start

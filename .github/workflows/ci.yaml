@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  pull_request:
+    branches: ['main']
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    services:
+      db:
+        image: timescale/timescaledb:latest-pg14
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_DB: timescaledb-rails_test
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby: ['2.7', '3.0', '3.1']
+        rails: ['6.0', '7.0']
+
+    env:
+      TEST_RAILS_VERSION: ${{ matrix.rails }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      - name: Set up Ruby ${{ matrix.ruby }}
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+
+      - name: Run bundle install
+        run: ./script/setup_test.sh
+
+      - name: Run test suite
+        run: bundle exec rspec
+
+      - name: Run rubocop
+        run: bundle exec rubocop
