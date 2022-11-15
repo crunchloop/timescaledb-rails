@@ -1,0 +1,15 @@
+AllCops:
+  Exclude:
+    - bin/**/*
+    - spec/dummy/db/**/*
+    - vendor/bundle/**/*
+  NewCops: enable
+
+Naming/FileName:
+  Exclude:
+    - lib/timescaledb-rails.rb
+
+require:
+  - rubocop-rspec
+  - rubocop-performance
+  - rubocop-rails
