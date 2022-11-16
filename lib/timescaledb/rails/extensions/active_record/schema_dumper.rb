@@ -31,7 +31,9 @@ module Timescaledb
           }
 
           result = options.each_with_object([]) do |(key, value), memo|
-            memo << "#{key}: #{value.inspect}"
+            value = value.inspect unless value.is_a?(String)
+
+            memo << "#{key}: #{value}"
             memo
           end
 
