@@ -27,17 +27,24 @@ module Timescaledb
 
         def hypertable_options(hypertable)
           options = {
-            chunk_time_interval: hypertable.chunk_time_interval.inspect
+            chunk_time_interval: hypertable.chunk_time_interval
           }
 
           result = options.each_with_object([]) do |(key, value), memo|
-            value = value.inspect unless value.is_a?(String)
-
-            memo << "#{key}: #{value}"
+            memo << "#{key}: #{format_hypertable_option_value(value)}"
             memo
           end
 
           result.join(', ')
+        end
+
+        def format_hypertable_option_value(value)
+          case value
+          when String then value.inspect
+          when ActiveSupport::Duration then value.inspect.inspect
+          else
+            value
+          end
         end
 
         def timescale_enabled?

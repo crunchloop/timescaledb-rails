@@ -35,6 +35,20 @@ class CreateEvent < ActiveRecord::Migration[7.0]
 end
 ```
 
+Create a hypertable without a PostgreSQL table by doing:
+
+```ruby
+class CreatePayloadHypertable < ActiveRecord::Migration[7.0]
+  def change
+    create_hypertable :payloads, :created_at, chunk_time_interval: '5 days' do |t|
+      t.string :ip, null: false
+
+      t.timestamps
+    end
+  end
+end
+```
+
 ## Supported Ruby/Rails versions
 
 Supported Ruby/Rails versions are listed in [`.github/workflows/ci.yaml`](https://github.com/crunchloop/timescaledb-rails/blob/main/.github/workflows/ci.yaml)
