@@ -11,8 +11,16 @@ module Timescaledb
         #
         #   create_hypertable('readings', 'created_at', chunk_time_interval: '7 days')
         #
-        def create_hypertable(table_name, time_column_name = 'created_at', **options)
-          options_as_sql = hypertable_options_to_sql(options.symbolize_keys)
+        def create_hypertable(table_name, time_column_name, **options, &block)
+          options = options.symbolize_keys
+          options_as_sql = hypertable_options_to_sql(options)
+
+          if block
+            primary_key = options[:primary_key]
+            force = options[:force]
+
+            create_table(table_name, id: false, primary_key: primary_key, force: force, **options, &block)
+          end
 
           execute "SELECT create_hypertable('#{table_name}', '#{time_column_name}', #{options_as_sql})"
         end

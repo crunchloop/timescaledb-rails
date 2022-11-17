@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2) do
+ActiveRecord::Schema[7.0].define(version: 3) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
   enable_extension "timescaledb"
@@ -29,5 +29,14 @@ ActiveRecord::Schema[7.0].define(version: 2) do
   end
 
   create_hypertable "events", "created_at", chunk_time_interval: "2 days"
+
+  create_table "payloads", id: false, force: :cascade do |t|
+    t.string "ip", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_at"], name: "payloads_created_at_idx", order: :desc
+  end
+
+  create_hypertable "payloads", "created_at", chunk_time_interval: "5 days"
 
 end
