@@ -19,12 +19,12 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'rails', '>= 6.0'
 
-  s.add_development_dependency 'pg', '>= 1.2'
-  s.add_development_dependency 'rspec', '>= 3.12'
-  s.add_development_dependency 'rubocop', '>= 1.39'
-  s.add_development_dependency 'rubocop-performance', '>= 1.15'
-  s.add_development_dependency 'rubocop-rails', '>= 2.17'
-  s.add_development_dependency 'rubocop-rspec', '>= 2.15'
+  s.add_development_dependency 'pg', '~> 1.2'
+  s.add_development_dependency 'rspec', '~> 3.12'
+  s.add_development_dependency 'rubocop', '~> 1.39'
+  s.add_development_dependency 'rubocop-performance', '~> 1.15'
+  s.add_development_dependency 'rubocop-rails', '~> 2.17'
+  s.add_development_dependency 'rubocop-rspec', '~> 2.15'
 
   s.authors = ['Iván Etchart', 'Santiago Doldán']
   s.email = 'oss@crunchloop.io'

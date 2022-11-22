@@ -1,3 +1,7 @@
+##  0.1.1 (November 22, 2022) ##
+
+*   Fix suggested version dependencies by rubygems.
+
 ##  0.1.0 (November 22, 2022) ##
 
 *   Create a hypertable from a PostgreSQL table by doing:
