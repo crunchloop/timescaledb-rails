@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'active_record/tasks/postgresql_database_tasks'
+require 'timescaledb/rails/orderby_compression'
 
 module Timescaledb
   module Rails
@@ -16,6 +17,7 @@ module Timescaledb
             Timescaledb::Rails::Hypertable.all.each do |hypertable|
               drop_ts_insert_trigger_statment(hypertable, file)
               create_hypertable_statement(hypertable, file)
+              add_hypertable_compression_statement(hypertable, file)
             end
           end
         end
@@ -33,11 +35,37 @@ module Timescaledb
           file << "SELECT create_hypertable('#{hypertable.hypertable_name}', '#{hypertable.time_column_name}', #{options});\n\n" # rubocop:disable Layout/LineLength
         end
 
+        def add_hypertable_compression_statement(hypertable, file)
+          return unless hypertable.compression?
+
+          options = hypertable_compression_options(hypertable)
+
+          file << "ALTER TABLE #{hypertable.hypertable_name} SET (#{options});\n\n"
+          file << "SELECT add_compression_policy('#{hypertable.hypertable_name}', INTERVAL '#{hypertable.compression_policy_interval}');\n\n" # rubocop:disable Layout/LineLength
+        end
+
         def hypertable_options(hypertable)
           sql_statements = ["if_not_exists => 'TRUE'"]
           sql_statements << "chunk_time_interval => INTERVAL '#{hypertable.chunk_time_interval.inspect}'"
 
           sql_statements.compact.join(', ')
+        end
+
+        def hypertable_compression_options(hypertable)
+          segmentby_setting = hypertable.compression_settings.segmentby_setting.first
+          orderby_setting = hypertable.compression_settings.orderby_setting.first
+
+          sql_statements = ['timescaledb.compress']
+          sql_statements << "timescaledb.compress_segmentby = '#{segmentby_setting.attname}'" if segmentby_setting
+
+          if orderby_setting
+            orderby = Timescaledb::Rails::OrderbyCompression.new(orderby_setting.attname,
+                                                                 orderby_setting.orderby_asc).to_s
+
+            sql_statements << "timescaledb.compress_orderby = '#{orderby}'"
+          end
+
+          sql_statements.join(', ')
         end
 
         def timescale_enabled?

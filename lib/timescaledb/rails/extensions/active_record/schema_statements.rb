@@ -25,6 +25,22 @@ module Timescaledb
           execute "SELECT create_hypertable('#{table_name}', '#{time_column_name}', #{options_as_sql})"
         end
 
+        # Enables compression and sets compression options.
+        #
+        #   add_hypertable_compression('events', 7.days, segment_by: :created_at, order_by: :name)
+        #
+        def add_hypertable_compression(table_name, compress_after, segment_by: nil, order_by: nil)
+          compress_after = compress_after.inspect if compress_after.is_a?(ActiveSupport::Duration)
+
+          options = ['timescaledb.compress']
+          options << "timescaledb.compress_orderby = '#{order_by}'" unless order_by.nil?
+          options << "timescaledb.compress_segmentby = '#{segment_by}'" unless segment_by.nil?
+
+          execute "ALTER TABLE #{table_name} SET (#{options.join(', ')})"
+
+          execute "SELECT add_compression_policy('#{table_name}', INTERVAL '#{compress_after}')"
+        end
+
         def hypertable_options_to_sql(options)
           sql_statements = options.map do |option, value|
             case option
