@@ -1,0 +1,19 @@
+#!/bin/bash
+
+for BUNDLE_GEMFILE in gemfiles/*.gemfile; do
+  echo "########"
+  echo "######"
+  echo "#### Running test suite with BUNDLE_GEMFILE=$BUNDLE_GEMFILE"
+  echo "######"
+  echo "########"
+
+  bundle exec rspec
+done
+
+echo "#########"
+echo "#######"
+echo "##### Running code linter"
+echo "#######"
+echo "#########"
+
+bundle exec rubocop

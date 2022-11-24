@@ -9,8 +9,11 @@ module Timescaledb
       # :nodoc:
       module PostgreSQLDatabaseTasks
         # @override
-        def structure_dump(filename, extra_flags)
-          super
+        def structure_dump(filename, extra_flags) # rubocop:disable Metrics/MethodLength
+          extra_flags = Array(extra_flags)
+          extra_flags << timescale_structure_dump_default_flags if timescale_enabled?
+
+          super(filename, extra_flags)
 
           return unless timescale_enabled?
 
@@ -47,7 +50,7 @@ module Timescaledb
 
         def hypertable_options(hypertable)
           sql_statements = ["if_not_exists => 'TRUE'"]
-          sql_statements << "chunk_time_interval => INTERVAL '#{hypertable.chunk_time_interval.inspect}'"
+          sql_statements << "chunk_time_interval => INTERVAL '#{hypertable.chunk_time_interval}'"
 
           sql_statements.compact.join(', ')
         end
@@ -69,6 +72,14 @@ module Timescaledb
           sql_statements.join(', ')
         end
 
+        # Returns `pg_dump` flag to exclude `_timescaledb_internal` schema tables.
+        #
+        # @return [String]
+        def timescale_structure_dump_default_flags
+          '--exclude-schema=_timescaledb_internal'
+        end
+
+        # @return [Boolean]
         def timescale_enabled?
           Timescaledb::Rails::Hypertable.table_exists?
         end
