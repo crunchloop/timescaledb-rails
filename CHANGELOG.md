@@ -1,3 +1,8 @@
+##  0.1.2 (November 24, 2022) ##
+
+*   Exclude `_timescaledb_internal` tables from structure.sql to avoid collision
+    issues when enabling compression on hypertables.
+
 ##  0.1.1 (November 22, 2022) ##
 
 *   Fix suggested version dependencies by rubygems.
