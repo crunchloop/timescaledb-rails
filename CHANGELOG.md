@@ -1,3 +1,22 @@
+##  0.1.3 (November 29, 2022) ##
+
+*   Define ActiveRecord::CommandRecorder methods for all timescaledb migration methods and also
+    define their invert command methods.
+
+*   Disable hypertable compression by doing:
+
+    ```ruby
+    class RemoveEventCompression < ActiveRecord::Migration[7.0]
+      def change
+        remove_hypertable_compression :events
+      end
+    end
+    ```
+
+*   Fix `structure_dump_flags` not working in Rails 6.
+
+*   Add `bin/ci` to run tests using all supported rails versions + code linter.
+
 ##  0.1.2 (November 24, 2022) ##
 
 *   Exclude `_timescaledb_internal` tables from structure.sql to avoid collision
