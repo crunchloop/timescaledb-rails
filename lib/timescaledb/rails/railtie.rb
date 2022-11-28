@@ -2,6 +2,7 @@
 
 require 'rails'
 
+require_relative 'extensions/active_record/command_recorder'
 require_relative 'extensions/active_record/postgresql_database_tasks'
 require_relative 'extensions/active_record/schema_dumper'
 require_relative 'extensions/active_record/schema_statements'
@@ -18,6 +19,10 @@ module Timescaledb
 
       initializer 'timescaledb-rails.add_timescale_support_to_active_record' do
         ActiveSupport.on_load(:active_record) do
+          ::ActiveRecord::Migration::CommandRecorder.prepend(
+            Timescaledb::Rails::ActiveRecord::CommandRecorder
+          )
+
           ::ActiveRecord::Tasks::PostgreSQLDatabaseTasks.prepend(
             Timescaledb::Rails::ActiveRecord::PostgreSQLDatabaseTasks
           )

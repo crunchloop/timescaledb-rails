@@ -41,6 +41,15 @@ module Timescaledb
           execute "SELECT add_compression_policy('#{table_name}', INTERVAL '#{compress_after}')"
         end
 
+        # Disables compression from given table.
+        #
+        #   remove_hypertable_compression('events')
+        #
+        def remove_hypertable_compression(table_name, compress_after = nil, segment_by: nil, order_by: nil) # rubocop:disable Lint/UnusedMethodArgument
+          execute "SELECT remove_compression_policy('#{table_name}');"
+        end
+
+        # @return [String]
         def hypertable_options_to_sql(options)
           sql_statements = options.map do |option, value|
             case option

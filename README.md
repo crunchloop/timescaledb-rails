@@ -60,6 +60,16 @@ class AddEventCompression < ActiveRecord::Migration[7.0]
 end
 ```
 
+Disable hypertable compression by doing:
+
+```ruby
+class RemoveEventCompression < ActiveRecord::Migration[7.0]
+  def change
+    remove_hypertable_compression :events
+  end
+end
+```
+
 ## Supported Ruby/Rails versions
 
 Supported Ruby/Rails versions are listed in [`.github/workflows/ci.yaml`](https://github.com/crunchloop/timescaledb-rails/blob/main/.github/workflows/ci.yaml)
