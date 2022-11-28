@@ -19,7 +19,9 @@ module Timescaledb
 
       # @return [String]
       def chunk_time_interval
-        time_dimension.time_interval
+        interval = time_dimension.time_interval
+
+        interval.is_a?(String) ? interval : interval.inspect
       end
 
       # @return [String]
