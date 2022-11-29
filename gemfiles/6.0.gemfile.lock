@@ -1,7 +1,7 @@
 PATH
   remote: ..
   specs:
-    timescaledb-rails (0.1.2)
+    timescaledb-rails (0.1.3)
       rails (>= 6.0)
 
 GEM
