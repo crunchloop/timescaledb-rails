@@ -1,4 +1,4 @@
-# TimescaleDB extension for Rails [![Actions Status](https://github.com/crunchloop/timescaledb-rails/workflows/CI/badge.svg?branch=main)](https://github.com/crunchloop/timescaledb-rails/actions?query=workflow%3ACI)
+# TimescaleDB extension for Rails [![Gem Version](https://badge.fury.io/rb/timescaledb-rails.svg)](https://badge.fury.io/rb/timescaledb-rails) [![Actions Status](https://github.com/crunchloop/timescaledb-rails/workflows/CI/badge.svg?branch=main)](https://github.com/crunchloop/timescaledb-rails/actions?query=workflow%3ACI)
 
 `timescaledb-rails` extends ActiveRecord PostgreSQL adapter and provides features from [`TimescaleDB`](https://www.timescale.com). It provides support for hypertables and other features added by TimescaleDB PostgreSQL extension.
 
