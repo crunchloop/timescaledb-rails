@@ -24,14 +24,17 @@ ActiveRecord::Schema[7.0].define(version: 4) do
   create_table "events", id: false, force: :cascade do |t|
     t.string "name", null: false
     t.time "occured_at", null: false
+    t.time "recorded_at", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "event_type_id"
     t.index ["created_at"], name: "events_created_at_idx", order: :desc
+    t.index ["event_type_id"], name: "index_events_on_event_type_id"
   end
 
   create_hypertable "events", "created_at", chunk_time_interval: "2 days"
 
-  add_hypertable_compression "events", "20 days", segment_by: "name", order_by: "occured_at DESC"
+  add_hypertable_compression "events", "20 days", segment_by: "event_type_id, name", order_by: "occured_at ASC, recorded_at DESC"
 
   create_table "payloads", id: false, force: :cascade do |t|
     t.string "ip", null: false

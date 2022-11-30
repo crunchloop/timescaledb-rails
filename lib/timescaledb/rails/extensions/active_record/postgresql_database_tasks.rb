@@ -56,20 +56,27 @@ module Timescaledb
         end
 
         def hypertable_compression_options(hypertable)
-          segmentby_setting = hypertable.compression_settings.segmentby_setting.first
-          orderby_setting = hypertable.compression_settings.orderby_setting.first
-
           sql_statements = ['timescaledb.compress']
-          sql_statements << "timescaledb.compress_segmentby = '#{segmentby_setting.attname}'" if segmentby_setting
 
-          if orderby_setting
-            orderby = Timescaledb::Rails::OrderbyCompression.new(orderby_setting.attname,
-                                                                 orderby_setting.orderby_asc).to_s
+          if (segments = compression_segment_settings(hypertable)).present?
+            sql_statements << "timescaledb.compress_segmentby = '#{segments.join(', ')}'"
+          end
 
-            sql_statements << "timescaledb.compress_orderby = '#{orderby}'"
+          if (orders = compression_order_settings(hypertable)).present?
+            sql_statements << "timescaledb.compress_orderby = '#{orders.join(', ')}'"
           end
 
           sql_statements.join(', ')
+        end
+
+        def compression_order_settings(hypertable)
+          hypertable.compression_order_settings.map do |os|
+            Timescaledb::Rails::OrderbyCompression.new(os.attname, os.orderby_asc).to_s
+          end
+        end
+
+        def compression_segment_settings(hypertable)
+          hypertable.compression_segment_settings.map(&:attname)
         end
 
         # Returns `pg_dump` flag to exclude `_timescaledb_internal` schema tables.

@@ -50,19 +50,25 @@ module Timescaledb
         end
 
         def hypertable_compression_options(hypertable)
-          segmentby_setting = hypertable.compression_settings.segmentby_setting.first
-          orderby_setting = hypertable.compression_settings.orderby_setting.first
-
           [].tap do |result|
-            result << "segment_by: #{segmentby_setting.attname.inspect}" if segmentby_setting
+            if (segments = compression_segment_settings(hypertable)).present?
+              result << "segment_by: #{segments.join(', ').inspect}"
+            end
 
-            if orderby_setting
-              orderby = Timescaledb::Rails::OrderbyCompression.new(orderby_setting.attname,
-                                                                   orderby_setting.orderby_asc).to_s
-
-              result << "order_by: #{orderby.inspect}"
+            if (orders = compression_order_settings(hypertable)).present?
+              result << "order_by: #{orders.join(', ').inspect}"
             end
           end
+        end
+
+        def compression_order_settings(hypertable)
+          hypertable.compression_order_settings.map do |os|
+            Timescaledb::Rails::OrderbyCompression.new(os.attname, os.orderby_asc).to_s
+          end
+        end
+
+        def compression_segment_settings(hypertable)
+          hypertable.compression_segment_settings.map(&:attname)
         end
 
         def format_hypertable_option_value(value)
