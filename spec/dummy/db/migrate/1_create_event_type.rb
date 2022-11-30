@@ -7,5 +7,7 @@ class CreateEventType < ActiveRecord::Migration[Rails.version[0..2]]
 
       t.timestamps
     end
+
+    add_belongs_to :events, :event_type
   end
 end
