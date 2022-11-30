@@ -24,6 +24,16 @@ module Timescaledb
         interval.is_a?(String) ? interval : interval.inspect
       end
 
+      # @return [ActiveRecord::Relation<CompressionSetting>]
+      def compression_segment_settings
+        compression_settings.segmentby_setting
+      end
+
+      # @return [ActiveRecord::Relation<CompressionSetting>]
+      def compression_order_settings
+        compression_settings.orderby_setting.where.not(attname: time_column_name)
+      end
+
       # @return [String]
       def compression_policy_interval
         ActiveSupport::Duration.parse(compression_job.config['compress_after']).inspect
