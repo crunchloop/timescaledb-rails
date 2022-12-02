@@ -36,9 +36,12 @@ module Timescaledb
 
       # @return [String]
       def compression_policy_interval
-        ActiveSupport::Duration.parse(compression_job.config['compress_after']).inspect
-      rescue ActiveSupport::Duration::ISO8601Parser::ParsingError
-        compression_job.config['compress_after']
+        parse_duration(compression_job.config['compress_after'])
+      end
+
+      # @return [String]
+      def retention_policy_interval
+        parse_duration(retention_job.config['drop_after'])
       end
 
       # @return [Boolean]
@@ -46,7 +49,17 @@ module Timescaledb
         compression_job.present?
       end
 
+      # @return [Boolean]
+      def retention?
+        retention_job.present?
+      end
+
       private
+
+      # @return [Job]
+      def retention_job
+        @retention_job ||= jobs.policy_retention.first
+      end
 
       # @return [Job]
       def compression_job
@@ -56,6 +69,13 @@ module Timescaledb
       # @return [Dimension]
       def time_dimension
         @time_dimension ||= dimensions.time.first
+      end
+
+      # @return [String]
+      def parse_duration(duration)
+        ActiveSupport::Duration.parse(duration).inspect
+      rescue ActiveSupport::Duration::ISO8601Parser::ParsingError
+        duration
       end
     end
   end

@@ -22,6 +22,7 @@ module Timescaledb
               drop_ts_insert_trigger_statment(hypertable, file)
               create_hypertable_statement(hypertable, file)
               add_hypertable_compression_statement(hypertable, file)
+              add_hypertable_retention_policy_statement(hypertable, file)
             end
           end
         end
@@ -46,6 +47,12 @@ module Timescaledb
 
           file << "ALTER TABLE #{hypertable.hypertable_name} SET (#{options});\n\n"
           file << "SELECT add_compression_policy('#{hypertable.hypertable_name}', INTERVAL '#{hypertable.compression_policy_interval}');\n\n" # rubocop:disable Layout/LineLength
+        end
+
+        def add_hypertable_retention_policy_statement(hypertable, file)
+          return unless hypertable.retention?
+
+          file << "SELECT add_retention_policy('#{hypertable.hypertable_name}', INTERVAL '#{hypertable.retention_policy_interval}');\n\n" # rubocop:disable Layout/LineLength
         end
 
         def hypertable_options(hypertable)

@@ -38,6 +38,12 @@ describe ActiveRecord::Tasks::DatabaseTasks do # rubocop:disable RSpec/FilePath
 
         expect(database_structure).to include("SELECT add_compression_policy('events', INTERVAL '20 days');")
       end
+
+      it 'includes add_retention_policy statements' do
+        described_class.dump_schema(database_configuration, :sql)
+
+        expect(database_structure).to include("SELECT add_retention_policy('events', INTERVAL '1 year');")
+      end
     end
 
     context 'when :ruby format' do
@@ -51,6 +57,12 @@ describe ActiveRecord::Tasks::DatabaseTasks do # rubocop:disable RSpec/FilePath
         described_class.dump_schema(database_configuration, :ruby)
 
         expect(database_structure).to include('add_hypertable_compression "events", "20 days", segment_by: "event_type_id, name", order_by: "occured_at ASC, recorded_at DESC"') # rubocop:disable Layout/LineLength
+      end
+
+      it 'includes add_hypertable_retention_policy statements' do
+        described_class.dump_schema(database_configuration, :ruby)
+
+        expect(database_structure).to include('add_hypertable_retention_policy "events", "1 year"')
       end
     end
   end
