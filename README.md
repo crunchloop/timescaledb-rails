@@ -70,6 +70,26 @@ class RemoveEventCompression < ActiveRecord::Migration[7.0]
 end
 ```
 
+Add hypertable retention policy by doing:
+
+```ruby
+class AddEventRetentionPolicy < ActiveRecord::Migration[7.0]
+  def change
+    add_hypertable_retention_policy :events, 1.year
+  end
+end
+```
+
+Remove hypertable retention policy by doing:
+
+```ruby
+class RemoveEventRetentionPolicy < ActiveRecord::Migration[7.0]
+  def change
+    remove_hypertable_retention_policy :events
+  end
+end
+```
+
 ## Supported Ruby/Rails versions
 
 Supported Ruby/Rails versions are listed in [`.github/workflows/ci.yaml`](https://github.com/crunchloop/timescaledb-rails/blob/main/.github/workflows/ci.yaml)

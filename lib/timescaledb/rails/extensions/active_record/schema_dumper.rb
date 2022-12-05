@@ -16,6 +16,7 @@ module Timescaledb
 
           hypertable(hypertable, stream)
           hypertable_compression(hypertable, stream)
+          hypertable_retention(hypertable, stream)
         end
 
         private
@@ -35,6 +36,15 @@ module Timescaledb
           options |= hypertable_compression_options(hypertable)
 
           stream.puts "  add_hypertable_compression #{options.join(', ')}"
+          stream.puts
+        end
+
+        def hypertable_retention(hypertable, stream)
+          return unless hypertable.retention?
+
+          options = [hypertable.hypertable_name.inspect, hypertable.retention_policy_interval.inspect]
+
+          stream.puts "  add_hypertable_retention_policy #{options.join(', ')}"
           stream.puts
         end
 

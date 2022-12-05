@@ -56,5 +56,35 @@ describe ActiveRecord::Migration::CommandRecorder do # rubocop:disable RSpec/Fil
         end
       end
     end
+
+    context 'when add_hypertable_retention_policy' do
+      let(:params) { [:events, 1.year, { order_by: :name, segment_by: :created_at }] }
+
+      it 'returns remove_hypertable_retention_policy' do
+        add_hypertable_retention_policy = recorder.inverse_of(:add_hypertable_retention_policy, params)
+
+        expect(add_hypertable_retention_policy).to eq([:remove_hypertable_retention_policy, params, nil])
+      end
+    end
+
+    context 'when remove_hypertable_retention_policy' do
+      context 'when given table name and compress after' do
+        let(:params) { [:events, 1.year, { segment_by: :created_at, order_by: :name }] }
+
+        it 'returns add_hypertable_retention_policy' do
+          remove_hypertable_retention_policy = recorder.inverse_of(:remove_hypertable_retention_policy, params)
+
+          expect(remove_hypertable_retention_policy).to eq([:add_hypertable_retention_policy, params, nil])
+        end
+      end
+
+      context 'when given only table name' do
+        it 'raises IrreversibleMigration error' do
+          expect do
+            recorder.inverse_of(:remove_hypertable_retention_policy, %i[events])
+          end.to raise_error(ActiveRecord::IrreversibleMigration)
+        end
+      end
+    end
   end
 end
