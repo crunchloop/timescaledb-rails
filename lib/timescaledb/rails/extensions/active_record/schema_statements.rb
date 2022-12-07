@@ -1,12 +1,27 @@
 # frozen_string_literal: true
 
-require 'active_record/connection_adapters/postgresql_adapter'
-
 module Timescaledb
   module Rails
     module ActiveRecord
       # :nodoc:
       module SchemaStatements
+        # Returns an array of hypertable names defined in the database.
+        def hypertables
+          query_values('SELECT hypertable_name FROM timescaledb_information.hypertables')
+        end
+
+        # Checks to see if the hypertable exists on the database.
+        #
+        #   hypertable_exists?(:developers)
+        #
+        def hypertable_exists?(hypertable)
+          query_value(
+            <<-SQL.squish
+              SELECT COUNT(*) FROM timescaledb_information.hypertables WHERE hypertable_name = #{quote(hypertable)}
+            SQL
+          ).to_i.positive?
+        end
+
         # Converts given standard PG table into a hypertable.
         #
         #   create_hypertable('readings', 'created_at', chunk_time_interval: '7 days')

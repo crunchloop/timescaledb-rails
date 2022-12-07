@@ -19,6 +19,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'rails', '>= 6.0'
 
+  s.add_development_dependency 'debug', '~> 1.0'
   s.add_development_dependency 'pg', '~> 1.2'
   s.add_development_dependency 'rspec', '~> 3.12'
   s.add_development_dependency 'rubocop', '~> 1.39'

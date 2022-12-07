@@ -12,6 +12,7 @@ when '6.0'
 end
 
 group :test do
+  gem 'debug', '>= 1.0.0'
   gem 'pg', '>= 1.2'
   gem 'rspec', '>= 3.12'
   gem 'rubocop', '>= 1.39'
