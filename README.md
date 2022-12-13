@@ -90,9 +90,13 @@ class RemoveEventRetentionPolicy < ActiveRecord::Migration[7.0]
 end
 ```
 
+## Contributing
+
+Please read [CONTRIBUTING.md](./CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests.
+
 ## Supported Ruby/Rails versions
 
-Supported Ruby/Rails versions are listed in [`.github/workflows/ci.yaml`](https://github.com/crunchloop/timescaledb-rails/blob/main/.github/workflows/ci.yaml)
+Supported Ruby/Rails versions are listed in [`.github/workflows/ci.yaml`](./.github/workflows/ci.yaml)
 
 ## License
 
