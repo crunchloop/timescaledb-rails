@@ -39,6 +39,7 @@ jobs:
 
     env:
       BUNDLE_GEMFILE: gemfiles/${{ matrix.rails }}.gemfile
+      RAILS_ENV: test
 
     steps:
       - name: Check out repository
@@ -50,7 +51,14 @@ jobs:
           ruby-version: ${{ matrix.ruby }}
 
       - name: Run bundle install
-        run: ./script/setup_test.sh
+        run: bundle install
+
+      - name: Run db migrate
+        run: |
+          export BUNDLE_GEMFILE=../../${BUNDLE_GEMFILE}
+          cd spec/dummy
+          bundle exec rake db:migrate
+          cd ../..
 
       - name: Run test suite
         run: bundle exec rspec
