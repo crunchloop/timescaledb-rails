@@ -10,6 +10,9 @@ require 'timescaledb/rails'
 
 ActiveRecord::Base.establish_connection(ENV.fetch('DATABASE_URL', 'postgres://postgres:postgres@127.0.0.1/timescaledb-rails_test'))
 
+# Extends ActiveRecord with timescaledb support
+Timescaledb::Rails.load
+
 require 'timescaledb/rails/models'
 
 IRB.conf[:PROMPT_MODE] = :SIMPLE
