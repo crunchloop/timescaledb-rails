@@ -1,0 +1,35 @@
+#!/bin/bash
+
+set -e
+
+for BUNDLE_GEMFILE in gemfiles/*.gemfile; do
+  echo "########"
+  echo "######"
+  echo "#### Installing gems with BUNDLE_GEMFILE=$BUNDLE_GEMFILE"
+  echo "######"
+  echo "########"
+
+  # Install ruby dependencies
+  bundle check || bundle install
+done
+
+echo "########"
+echo "######"
+echo "#### Setting up database"
+echo "######"
+echo "########"
+
+# Move to dummy rails application
+cd spec/dummy
+
+# Disable db env check
+export DISABLE_DATABASE_ENVIRONMENT_CHECK=1
+
+# Setup dummy app test database
+export RAILS_ENV=test
+bundle exec rake db:drop
+bundle exec rake db:create
+bundle exec rake db:migrate
+
+# Return back to gem root path
+cd ../..
