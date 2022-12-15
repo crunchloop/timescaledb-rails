@@ -34,6 +34,11 @@ module Timescaledb
           Timescaledb::Rails::Hypertable.find_by(hypertable_where_options)
         end
 
+        # @return [ActiveRecord::Relation<Timescaledb::Rails::Chunk>]
+        def hypertable_chunks
+          Timescaledb::Rails::Chunk.where(hypertable_where_options)
+        end
+
         # @return [ActiveRecord::Relation<Timescaledb::Rails::Job>]
         def hypertable_jobs
           Timescaledb::Rails::Job.where(hypertable_where_options)

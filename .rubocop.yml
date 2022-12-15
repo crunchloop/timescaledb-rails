@@ -10,6 +10,10 @@ Naming/FileName:
   Exclude:
     - lib/timescaledb-rails.rb
 
+Rails/ApplicationRecord:
+  Exclude:
+    - lib/timescaledb/rails/models/**/*
+
 RSpec/NestedGroups:
   Max: 4
 

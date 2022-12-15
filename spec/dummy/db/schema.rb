@@ -23,7 +23,7 @@ ActiveRecord::Schema[7.0].define(version: 5) do
 
   create_table "events", id: false, force: :cascade do |t|
     t.string "name", null: false
-    t.time "occured_at", null: false
+    t.time "occurred_at", null: false
     t.time "recorded_at", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -34,7 +34,7 @@ ActiveRecord::Schema[7.0].define(version: 5) do
 
   create_hypertable "events", "created_at", chunk_time_interval: "2 days"
 
-  add_hypertable_compression "events", "20 days", segment_by: "event_type_id, name", order_by: "occured_at ASC, recorded_at DESC"
+  add_hypertable_compression "events", "20 days", segment_by: "event_type_id, name", order_by: "occurred_at ASC, recorded_at DESC"
 
   add_hypertable_retention_policy "events", "1 year"
 
