@@ -26,7 +26,7 @@ class CreateEvent < ActiveRecord::Migration[7.0]
   def change
     create_table :events, id: false do |t|
       t.string :name, null: false
-      t.time :occured_at, null: false
+      t.time :occurred_at, null: false
 
       t.timestamps
     end
@@ -55,7 +55,7 @@ Enable hypertable compression by doing:
 ```ruby
 class AddEventCompression < ActiveRecord::Migration[7.0]
   def change
-    add_hypertable_compression :events, 20.days, segment_by: :name, order_by: 'occured_at DESC'
+    add_hypertable_compression :events, 20.days, segment_by: :name, order_by: 'occurred_at DESC'
   end
 end
 ```

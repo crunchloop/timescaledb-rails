@@ -30,7 +30,7 @@ describe ActiveRecord::Tasks::DatabaseTasks do # rubocop:disable RSpec/FilePath
       it 'includes compression ALTER TABLE statements' do
         described_class.dump_schema(database_configuration, :sql)
 
-        expect(database_structure).to include("ALTER TABLE events SET (timescaledb.compress, timescaledb.compress_segmentby = 'event_type_id, name', timescaledb.compress_orderby = 'occured_at ASC, recorded_at DESC');") # rubocop:disable Layout/LineLength
+        expect(database_structure).to include("ALTER TABLE events SET (timescaledb.compress, timescaledb.compress_segmentby = 'event_type_id, name', timescaledb.compress_orderby = 'occurred_at ASC, recorded_at DESC');") # rubocop:disable Layout/LineLength
       end
 
       it 'includes add_compression_policy statements' do
@@ -56,7 +56,7 @@ describe ActiveRecord::Tasks::DatabaseTasks do # rubocop:disable RSpec/FilePath
       it 'includes add_hypertable_compression statements' do
         described_class.dump_schema(database_configuration, :ruby)
 
-        expect(database_structure).to include('add_hypertable_compression "events", "20 days", segment_by: "event_type_id, name", order_by: "occured_at ASC, recorded_at DESC"') # rubocop:disable Layout/LineLength
+        expect(database_structure).to include('add_hypertable_compression "events", "20 days", segment_by: "event_type_id, name", order_by: "occurred_at ASC, recorded_at DESC"') # rubocop:disable Layout/LineLength
       end
 
       it 'includes add_hypertable_retention_policy statements' do

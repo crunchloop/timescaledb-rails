@@ -112,7 +112,7 @@ describe Timescaledb::Rails::Model do
     context 'with compression' do
       it 'includes all compression settings' do
         expect(HypertableWithCompression.hypertable_compression_settings.map(&:attname))
-          .to match_array(%w[event_type_id name occured_at recorded_at created_at])
+          .to match_array(%w[event_type_id name occurred_at recorded_at created_at])
       end
     end
 

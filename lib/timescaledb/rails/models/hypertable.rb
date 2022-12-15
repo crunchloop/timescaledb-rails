@@ -11,6 +11,7 @@ module Timescaledb
                                       class_name: 'Timescaledb::Rails::CompressionSetting'
       has_many :dimensions, foreign_key: 'hypertable_name', class_name: 'Timescaledb::Rails::Dimension'
       has_many :jobs, foreign_key: 'hypertable_name', class_name: 'Timescaledb::Rails::Job'
+      has_many :chunks, foreign_key: 'hypertable_name', class_name: 'Timescaledb::Rails::Chunk'
 
       # @return [String]
       def time_column_name
