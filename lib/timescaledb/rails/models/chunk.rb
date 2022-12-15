@@ -19,6 +19,12 @@ module Timescaledb
           "SELECT compress_chunk('#{chunk_full_name}')"
         )
       end
+
+      def decompress!
+        ::ActiveRecord::Base.connection.execute(
+          "SELECT decompress_chunk('#{chunk_full_name}')"
+        )
+      end
     end
   end
 end
