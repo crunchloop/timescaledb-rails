@@ -17,6 +17,10 @@ module Timescaledb
           record(:remove_hypertable_compression, args, &block)
         end
 
+        def add_hypertable_reorder_policy(*args, &block)
+          record(:add_hypertable_reorder_policy, args, &block)
+        end
+
         def add_hypertable_retention_policy(*args, &block)
           record(:add_hypertable_retention_policy, args, &block)
         end
