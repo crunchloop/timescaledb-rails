@@ -21,6 +21,10 @@ module Timescaledb
           record(:add_hypertable_reorder_policy, args, &block)
         end
 
+        def remove_hypertable_reorder_policy(*args, &block)
+          record(:remove_hypertable_reorder_policy, args, &block)
+        end
+
         def add_hypertable_retention_policy(*args, &block)
           record(:add_hypertable_retention_policy, args, &block)
         end
@@ -59,6 +63,18 @@ module Timescaledb
           end
 
           [:add_hypertable_retention_policy, args, block]
+        end
+
+        def invert_add_hypertable_reorder_policy(args, &block)
+          [:remove_hypertable_reorder_policy, args, block]
+        end
+
+        def invert_remove_hypertable_reorder_policy(args, &block)
+          if args.size < 2
+            raise ::ActiveRecord::IrreversibleMigration, 'remove_hypertable_reorder_policy is only reversible if given table name and index name.' # rubocop:disable Layout/LineLength
+          end
+
+          [:add_hypertable_reorder_policy, args, block]
         end
       end
     end
