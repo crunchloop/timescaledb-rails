@@ -113,6 +113,30 @@ class Event < ActiveRecord::Base
 end
 ```
 
+If you need to query data for a specific time period, `Timescaledb::Rails::Model` incluldes useful scopes
+
+```ruby
+# If you want to get all records from last year
+Event.last_year #=> [#<Event name...>, ...]
+
+# Or if you want to get records from this year
+Event.this_year #=> [#<Event name...>, ...]
+
+# Or even getting records from today
+Event.today #=> [#<Event name...>, ...]
+```
+
+Here the list of all available scopes
+
+* last_year
+* last_month
+* last_week
+* this_year
+* this_month
+* this_week
+* yesterday
+* today
+
 If you need information about your hypertable, use the following helper methods to get useful information
 
 ```ruby

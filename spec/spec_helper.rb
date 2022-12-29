@@ -11,6 +11,7 @@ Dir[File.expand_path('./support/**/*.rb', __dir__)].sort.each { |f| require f }
 
 RSpec.configure do |config|
   config.include(Timescaledb::Rails::DatabaseHelpers)
+  config.include(Timescaledb::Rails::FactoryHelpers)
 
   # rspec-expectations config goes here. You can use an alternate
   # assertion/expectation library such as wrong or the stdlib/minitest
