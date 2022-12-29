@@ -16,6 +16,7 @@ module Timescaledb
 
           hypertable(hypertable, stream)
           hypertable_compression(hypertable, stream)
+          hypertable_reorder(hypertable, stream)
           hypertable_retention(hypertable, stream)
         end
 
@@ -36,6 +37,15 @@ module Timescaledb
           options |= hypertable_compression_options(hypertable)
 
           stream.puts "  add_hypertable_compression #{options.join(', ')}"
+          stream.puts
+        end
+
+        def hypertable_reorder(hypertable, stream)
+          return unless hypertable.reorder?
+
+          options = [hypertable.hypertable_name.inspect, hypertable.reorder_policy_index_name.inspect]
+
+          stream.puts "  add_hypertable_reorder_policy #{options.join(', ')}"
           stream.puts
         end
 

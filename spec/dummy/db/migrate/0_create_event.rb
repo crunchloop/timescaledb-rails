@@ -12,5 +12,7 @@ class CreateEvent < ActiveRecord::Migration[Rails.version[0..2]]
 
       t.timestamps
     end
+
+    add_index :events, %i[created_at name]
   end
 end

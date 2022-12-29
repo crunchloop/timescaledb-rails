@@ -80,6 +80,14 @@ module Timescaledb
           execute "SELECT remove_retention_policy('#{table_name}')"
         end
 
+        # Adds a policy to reorder chunks on a given hypertable index in the background.
+        #
+        #   add_hypertable_reorder_policy('events', 'index_events_on_created_at_and_name')
+        #
+        def add_hypertable_reorder_policy(table_name, index_name)
+          execute "SELECT add_reorder_policy('#{table_name}', '#{index_name}')"
+        end
+
         # @return [String]
         def hypertable_options_to_sql(options)
           sql_statements = options.map do |option, value|

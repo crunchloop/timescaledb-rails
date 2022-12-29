@@ -41,6 +41,11 @@ module Timescaledb
       end
 
       # @return [String]
+      def reorder_policy_index_name
+        reorder_job.config['index_name']
+      end
+
+      # @return [String]
       def retention_policy_interval
         parse_duration(retention_job.config['drop_after'])
       end
@@ -51,11 +56,21 @@ module Timescaledb
       end
 
       # @return [Boolean]
+      def reorder?
+        reorder_job.present?
+      end
+
+      # @return [Boolean]
       def retention?
         retention_job.present?
       end
 
       private
+
+      # @return [Job]
+      def reorder_job
+        @reorder_job ||= jobs.policy_reorder.first
+      end
 
       # @return [Job]
       def retention_job
