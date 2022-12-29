@@ -88,6 +88,14 @@ module Timescaledb
           execute "SELECT add_reorder_policy('#{table_name}', '#{index_name}')"
         end
 
+        # Removes a policy to reorder a particular hypertable.
+        #
+        #   remove_hypertable_reorder_policy('events')
+        #
+        def remove_hypertable_reorder_policy(table_name, _index_name = nil)
+          execute "SELECT remove_reorder_policy('#{table_name}')"
+        end
+
         # @return [String]
         def hypertable_options_to_sql(options)
           sql_statements = options.map do |option, value|

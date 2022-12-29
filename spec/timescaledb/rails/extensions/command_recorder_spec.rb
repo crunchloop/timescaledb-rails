@@ -86,5 +86,35 @@ describe ActiveRecord::Migration::CommandRecorder do # rubocop:disable RSpec/Fil
         end
       end
     end
+
+    context 'when add_hypertable_reorder_policy' do
+      let(:params) { %i[events index_events_on_created_at_and_name] }
+
+      it 'returns remove_hypertable_reorder_policy' do
+        add_hypertable_reorder_policy = recorder.inverse_of(:add_hypertable_reorder_policy, params)
+
+        expect(add_hypertable_reorder_policy).to eq([:remove_hypertable_reorder_policy, params, nil])
+      end
+    end
+
+    context 'when remove_hypertable_reorder_policy' do
+      context 'when given table name and index name' do
+        let(:params) { %i[events index_events_on_created_at_and_name] }
+
+        it 'returns add_hypertable_reorder_policy' do
+          remove_hypertable_reorder_policy = recorder.inverse_of(:remove_hypertable_reorder_policy, params)
+
+          expect(remove_hypertable_reorder_policy).to eq([:add_hypertable_reorder_policy, params, nil])
+        end
+      end
+
+      context 'when given only table name' do
+        it 'raises IrreversibleMigration error' do
+          expect do
+            recorder.inverse_of(:remove_hypertable_reorder_policy, %i[events])
+          end.to raise_error(ActiveRecord::IrreversibleMigration)
+        end
+      end
+    end
   end
 end

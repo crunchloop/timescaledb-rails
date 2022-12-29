@@ -19,6 +19,8 @@ gem 'timescaledb-rails', '~> 0.1'
 
 ## Examples
 
+### Migrations
+
 Create a hypertable from a PostgreSQL table by doing:
 
 ```ruby
@@ -86,6 +88,26 @@ Remove hypertable retention policy by doing:
 class RemoveEventRetentionPolicy < ActiveRecord::Migration[7.0]
   def change
     remove_hypertable_retention_policy :events
+  end
+end
+```
+
+Add hypertable reorder policy by doing:
+
+```ruby
+class AddEventReorderPolicy < ActiveRecord::Migration[7.0]
+  def change
+    add_hypertable_reorder_policy :events, :index_events_on_created_at_and_name
+  end
+end
+```
+
+Remove hypertable reorder policy by doing:
+
+```ruby
+class RemoveEventReorderPolicy < ActiveRecord::Migration[7.0]
+  def change
+    remove_hypertable_reorder_policy :events
   end
 end
 ```
