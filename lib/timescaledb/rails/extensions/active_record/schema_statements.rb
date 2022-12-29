@@ -76,7 +76,7 @@ module Timescaledb
         #
         #   remove_hypertable_retention_policy('events')
         #
-        def remove_hypertable_retention_policy(table_name)
+        def remove_hypertable_retention_policy(table_name, _drop_after = nil)
           execute "SELECT remove_retention_policy('#{table_name}')"
         end
 
