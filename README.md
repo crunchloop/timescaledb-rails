@@ -1,6 +1,6 @@
 # TimescaleDB extension for Rails [![Gem Version](https://badge.fury.io/rb/timescaledb-rails.svg)](https://badge.fury.io/rb/timescaledb-rails) [![Actions Status](https://github.com/crunchloop/timescaledb-rails/workflows/CI/badge.svg?branch=main)](https://github.com/crunchloop/timescaledb-rails/actions?query=workflow%3ACI)
 
-`timescaledb-rails` extends ActiveRecord PostgreSQL adapter and provides features from [`TimescaleDB`](https://www.timescale.com). It provides support for hypertables and other features added by TimescaleDB PostgreSQL extension.
+`timescaledb-rails` extends ActiveRecord PostgreSQL adapter and provides features from [TimescaleDB](https://www.timescale.com). It provides support for hypertables and other features added by TimescaleDB PostgreSQL extension.
 
 
 ## Installation
@@ -17,11 +17,11 @@ Or include it in your project's `Gemfile` with Bundler:
 gem 'timescaledb-rails', '~> 0.1'
 ```
 
-## Examples
+## Usage
 
 ### Migrations
 
-Create a hypertable from a PostgreSQL table by doing:
+Create a hypertable from a PostgreSQL table
 
 ```ruby
 class CreateEvent < ActiveRecord::Migration[7.0]
@@ -38,7 +38,7 @@ class CreateEvent < ActiveRecord::Migration[7.0]
 end
 ```
 
-Create a hypertable without a PostgreSQL table by doing:
+Create a hypertable without a PostgreSQL table
 
 ```ruby
 class CreatePayloadHypertable < ActiveRecord::Migration[7.0]
@@ -52,64 +52,94 @@ class CreatePayloadHypertable < ActiveRecord::Migration[7.0]
 end
 ```
 
-Enable hypertable compression by doing:
+Add hypertable compression
 
 ```ruby
 class AddEventCompression < ActiveRecord::Migration[7.0]
-  def change
+  def up
     add_hypertable_compression :events, 20.days, segment_by: :name, order_by: 'occurred_at DESC'
   end
-end
-```
 
-Disable hypertable compression by doing:
-
-```ruby
-class RemoveEventCompression < ActiveRecord::Migration[7.0]
-  def change
+  def down
     remove_hypertable_compression :events
   end
 end
 ```
 
-Add hypertable retention policy by doing:
+Add hypertable retention policy
 
 ```ruby
 class AddEventRetentionPolicy < ActiveRecord::Migration[7.0]
-  def change
+  def up
     add_hypertable_retention_policy :events, 1.year
   end
-end
-```
 
-Remove hypertable retention policy by doing:
-
-```ruby
-class RemoveEventRetentionPolicy < ActiveRecord::Migration[7.0]
-  def change
+  def down
     remove_hypertable_retention_policy :events
   end
 end
 ```
 
-Add hypertable reorder policy by doing:
+Add hypertable reorder policy
 
 ```ruby
 class AddEventReorderPolicy < ActiveRecord::Migration[7.0]
-  def change
+  def up
     add_hypertable_reorder_policy :events, :index_events_on_created_at_and_name
+  end
+
+  def down
+    remove_hypertable_reorder_policy :events
   end
 end
 ```
 
-Remove hypertable reorder policy by doing:
+### Models
+
+If one of your models need TimescaleDB support, just include `Timescaledb::Rails::Model`
+```ruby
+class Event < ActiveRecord::Base
+  include Timescaledb::Rails::Model
+end
+```
+
+If the hypertable does not belong to the default schema, don't forget to override `table_name`
 
 ```ruby
-class RemoveEventReorderPolicy < ActiveRecord::Migration[7.0]
-  def change
-    remove_hypertable_reorder_policy :events
-  end
+class Event < ActiveRecord::Base
+  include Timescaledb::Rails::Model
+
+  self.table_name = 'v1.events'
 end
+```
+
+If you need information about your hypertable, use the following helper methods to get useful information
+
+```ruby
+# Hypertable metadata
+Event.hypertable #=> #<Timescaledb::Rails::Hypertable ...>
+
+# Hypertable chunks metadata
+Event.hypertable_chunks #=> [#<Timescaledb::Rails::Chunk ...>, ...]
+
+# Hypertable jobs, it includes jobs like compression, retention or reorder policies, etc.
+Event.hypertable_jobs #=> [#<Timescaledb::Rails::Job ...>, ...]
+
+# Hypertable dimensions, like time or space dimensions
+Event.hypertable_dimensions #=> [#<Timescaledb::Rails::Dimension ...>, ...]
+
+# Hypertable compression settings
+Event.hypertable_compression_settings #=> [#<Timescaledb::Rails::CompressionSetting ...>, ...]
+```
+
+If you need to compress or decompress a specific chunk
+
+```ruby
+chunk = Event.hypertable_chunks.first
+
+chunk.compress! unless chunk.is_compressed?
+
+chunk.decompress! if chunk.is_compressed?
 ```
 
 ## Contributing
