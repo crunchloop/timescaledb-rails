@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'timescaledb/rails/model/scopes'
+
 module Timescaledb
   module Rails
     # :nodoc:
@@ -8,8 +10,12 @@ module Timescaledb
 
       extend ActiveSupport::Concern
 
+      include Scopes
+
       # :nodoc:
       module ClassMethods
+        delegate :time_column_name, to: :hypertable, prefix: true
+
         # Returns only the name of the hypertable, table_name could include
         # the schema path, we need to remove it.
         #

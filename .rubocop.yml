@@ -14,6 +14,9 @@ Rails/ApplicationRecord:
   Exclude:
     - lib/timescaledb/rails/models/**/*
 
+RSpec/MessageSpies:
+  EnforcedStyle: receive
+
 RSpec/NestedGroups:
   Max: 4
 

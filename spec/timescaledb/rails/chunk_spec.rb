@@ -3,60 +3,23 @@
 require 'spec_helper'
 
 describe Timescaledb::Rails::Chunk do
-  let(:today_event) do
-    Event.create(name: 'today', created_at: Time.current, occurred_at: 1.hour.ago, recorded_at: Time.current)
-  end
-
-  let(:last_month_event) do
-    Event.create(name: 'last month', created_at: 1.month.ago, occurred_at: 1.month.ago, recorded_at: 1.month.ago)
-  end
-
-  let(:chunk) { Event.hypertable.chunks.order(:range_end).last }
-
-  before do
-    today_event
-    last_month_event
-  end
-
-  after do
-    Event.hypertable.chunks.compressed.map(&:decompress!)
-
-    Event.delete_all
-  end
+  let(:chunk) { described_class.new(chunk_name: 'name', chunk_schema: 'schema') }
 
   describe '#compress!' do
-    context 'when chunk is decompressed' do
-      it 'compresses a chunk' do
-        chunk.compress!
+    it 'compresses the chunk' do
+      expect(ActiveRecord::Base.connection)
+        .to receive(:execute).with("SELECT compress_chunk('#{chunk.chunk_full_name}')")
 
-        expect(chunk.reload).to be_is_compressed
-      end
-    end
-
-    context 'when chunk is already compressed' do
-      before { chunk.compress! }
-
-      it 'throws an error when trying to compress' do
-        expect { chunk.compress! }.to raise_error(ActiveRecord::StatementInvalid)
-      end
+      chunk.compress!
     end
   end
 
   describe '#decompress!' do
-    context 'when chunk is compressed' do
-      before { chunk.compress! }
+    it 'decompresses a chunk' do
+      expect(ActiveRecord::Base.connection)
+        .to receive(:execute).with("SELECT decompress_chunk('#{chunk.chunk_full_name}')")
 
-      it 'decompresses a chunk' do
-        chunk.decompress!
-
-        expect(chunk.reload).not_to be_is_compressed
-      end
-    end
-
-    context 'when there is no compressed chunk' do
-      it 'throws an error when trying to decompress' do
-        expect { chunk.decompress! }.to raise_error(ActiveRecord::StatementInvalid)
-      end
+      chunk.decompress!
     end
   end
 end
