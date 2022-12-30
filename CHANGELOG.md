@@ -1,3 +1,66 @@
+##  0.1.4 (December 30, 2022) ##
+
+*   Add time scopes to Active Record models
+
+    | scope         | description                     |
+    | ------------- | ------------------------------- |
+    | last_year     | Returns records from last year  |
+    | last_month    | Returns records from last month |
+    | last_week     | Returns records from last week  |
+    | this_year     | Returns records from this year  |
+    | this_month    | Returns records from this month |
+    | this_week     | Returns records from this week  |
+    | yesterday     | Returns records from yesterday  |
+    | today         | Returns records from today      |
+
+*   Add hypertable reorder policy support
+
+    ```ruby
+    class AddEventReorderPolicy < ActiveRecord::Migration[7.0]
+      def up
+        add_hypertable_reorder_policy :events, :index_events_on_created_at_and_name
+      end
+
+      def down
+        remove_hypertable_reorder_policy :events
+      end
+    end
+    ```
+
+*   Add chunk compression support
+
+    ```ruby
+    chunk = Event.hypertable_chunks.first
+
+    chunk.compress! unless chunk.is_compressed?
+
+    chunk.decompress! if chunk.is_compressed?
+    ```
+
+*   Add TimescaleDB support to Active Record models
+
+    ```ruby
+    class Event < ActiveRecord::Base
+      include Timescaledb::Rails::Model
+    end
+    ```
+
+*   Add hypertable retention policy support
+
+    ```ruby
+    class AddEventRetentionPolicy < ActiveRecord::Migration[7.0]
+      def up
+        add_hypertable_retention_policy :events, 1.year
+      end
+
+      def down
+        remove_hypertable_retention_policy :events
+      end
+    end
+    ```
+
+*   Add support to compress by multiple columns
+
 ##  0.1.3 (November 29, 2022) ##
 
 *   Define ActiveRecord::CommandRecorder methods for all timescaledb migration methods and also

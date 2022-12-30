@@ -2,7 +2,6 @@
 
 `timescaledb-rails` extends ActiveRecord PostgreSQL adapter and provides features from [TimescaleDB](https://www.timescale.com). It provides support for hypertables and other features added by TimescaleDB PostgreSQL extension.
 
-
 ## Installation
 
 Install `timescaledb-rails` from RubyGems:
