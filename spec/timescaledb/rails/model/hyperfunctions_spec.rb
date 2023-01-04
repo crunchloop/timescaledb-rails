@@ -3,15 +3,18 @@
 require 'spec_helper'
 
 describe Timescaledb::Rails::Model::Hyperfunctions do
-  after { Event.delete_all }
-
   describe '.time_bucket' do
-    let(:january_2022_event) { create_event(name: 'January event 2022', created_at: DateTime.parse('01/01/2022')) }
-    let(:march_2022_event) { create_event(name: 'March event 2022', created_at: DateTime.parse('03/01/2022')) }
+    let!(:january_2022_payload) do
+      create_payload(data: 'January payload 2022', created_at: DateTime.parse('01/01/2022'))
+    end
 
-    before do
-      january_2022_event
-      march_2022_event
+    let!(:march_2022_payload) do
+      create_payload(data: 'March payload 2022', created_at: DateTime.parse('03/01/2022'))
+    end
+
+    after do
+      january_2022_payload.destroy
+      march_2022_payload.destroy
     end
 
     context 'when the date column is not specified' do
@@ -19,7 +22,7 @@ describe Timescaledb::Rails::Model::Hyperfunctions do
         let(:interval) { '1 day' }
 
         it 'returns an active record relation' do
-          result = Event.time_bucket(interval)
+          result = Payload.time_bucket(interval)
 
           expect(result).to be_a(ActiveRecord::Relation)
         end
@@ -29,13 +32,13 @@ describe Timescaledb::Rails::Model::Hyperfunctions do
         let(:interval) { 1.day }
 
         it 'uses the default date column' do
-          result = Event.time_bucket(interval)
+          result = Payload.time_bucket(interval)
 
           expect(result.to_sql).to include("SELECT time_bucket('1 day', created_at) as time_bucket")
         end
 
         it 'returns an active record relation' do
-          result = Event.time_bucket(interval)
+          result = Payload.time_bucket(interval)
 
           expect(result).to be_a(ActiveRecord::Relation)
         end
@@ -45,7 +48,7 @@ describe Timescaledb::Rails::Model::Hyperfunctions do
         let(:interval) { 1.year }
 
         it 'returns a single record' do
-          result = Event.time_bucket(interval)
+          result = Payload.time_bucket(interval)
 
           expect(result.to_a.size).to eq(1)
         end
@@ -55,7 +58,7 @@ describe Timescaledb::Rails::Model::Hyperfunctions do
         let(:interval) { 1.hour }
 
         it 'returns multiple records' do
-          result = Event.time_bucket(interval)
+          result = Payload.time_bucket(interval)
 
           expect(result.to_a.size).to eq(2)
         end
@@ -67,7 +70,7 @@ describe Timescaledb::Rails::Model::Hyperfunctions do
       let(:date_column) { :recorded_at }
 
       it 'uses the specified date column' do
-        result = Event.time_bucket(interval, date_column)
+        result = Payload.time_bucket(interval, date_column)
 
         expect(result.to_sql).to include("SELECT time_bucket('1 day', #{date_column}) as time_bucket")
       end
@@ -77,7 +80,7 @@ describe Timescaledb::Rails::Model::Hyperfunctions do
         let(:date_column) { :recorded_at }
 
         it 'returns an active record relation' do
-          result = Event.time_bucket(interval, date_column)
+          result = Payload.time_bucket(interval, date_column)
 
           expect(result).to be_a(ActiveRecord::Relation)
         end
@@ -88,7 +91,7 @@ describe Timescaledb::Rails::Model::Hyperfunctions do
         let(:date_column) { :recorded_at }
 
         it 'returns an active record relation' do
-          result = Event.time_bucket(interval, date_column)
+          result = Payload.time_bucket(interval, date_column)
 
           expect(result).to be_a(ActiveRecord::Relation)
         end
@@ -100,7 +103,7 @@ describe Timescaledb::Rails::Model::Hyperfunctions do
       let(:date_column) { 'invalid_column' }
 
       it 'raises an error' do
-        result = Event.time_bucket(interval, date_column)
+        result = Payload.time_bucket(interval, date_column)
 
         expect { result.inspect }.to raise_error(ActiveRecord::StatementInvalid)
       end
@@ -110,7 +113,7 @@ describe Timescaledb::Rails::Model::Hyperfunctions do
       let(:interval) { 'invalid interval' }
 
       it 'raises an error' do
-        result = Event.time_bucket(interval)
+        result = Payload.time_bucket(interval)
 
         expect { result.inspect }.to raise_error(ActiveRecord::StatementInvalid)
       end

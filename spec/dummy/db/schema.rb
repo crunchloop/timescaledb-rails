@@ -43,10 +43,14 @@ ActiveRecord::Schema.define(version: 6) do
   add_hypertable_retention_policy "events", "1 year"
 
   create_table "payloads", id: false, force: :cascade do |t|
+    t.integer "id", default: -> { "nextval('payload_id_seq'::regclass)" }, null: false
+    t.string "data", null: false
+    t.string "format", null: false
     t.string "ip", null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["created_at"], name: "payloads_created_at_idx", order: :desc
+    t.index ["id", "created_at"], name: "index_payloads_on_id_and_created_at"
   end
 
   create_hypertable "payloads", "created_at", chunk_time_interval: "5 days"
