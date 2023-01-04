@@ -165,6 +165,28 @@ chunk.compress! unless chunk.is_compressed?
 chunk.decompress! if chunk.is_compressed?
 ```
 
+### Hyperfunctions
+
+#### Time bucket
+
+You can call the time bucket function with an interval (note that leaving the target column blank will use the default time column of the hypertable)
+
+```ruby
+Event.time_bucket(1.day)
+
+Event.time_bucket('1 day')
+
+Event.time_bucket(1.day, :created_at)
+
+Event.time_bucket(1.day, 'occurred_at')
+```
+
+You may add aggregation like so:
+
+```ruby
+Event.time_bucket(1.day).select('avg(target) as target_avg')
+```
+
 ## Contributing
 
 Please read [CONTRIBUTING.md](./CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests.

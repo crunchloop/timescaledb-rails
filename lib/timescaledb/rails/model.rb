@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'timescaledb/rails/model/scopes'
+require 'timescaledb/rails/model/hyperfunctions'
 
 module Timescaledb
   module Rails
@@ -15,6 +16,8 @@ module Timescaledb
       # :nodoc:
       module ClassMethods
         delegate :time_column_name, to: :hypertable, prefix: true
+
+        include Hyperfunctions
 
         # Returns only the name of the hypertable, table_name could include
         # the schema path, we need to remove it.
