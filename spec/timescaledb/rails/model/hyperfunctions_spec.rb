@@ -17,6 +17,12 @@ describe Timescaledb::Rails::Model::Hyperfunctions do
       march_2022_payload.destroy
     end
 
+    it 'extends AggregateFunctions module' do
+      result = Payload.time_bucket(1.day)
+
+      expect(result.extending_values).to include(Timescaledb::Rails::Model::AggregateFunctions)
+    end
+
     context 'when the date column is not specified' do
       context 'when the interval is a string' do
         let(:interval) { '1 day' }

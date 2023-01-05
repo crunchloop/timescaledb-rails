@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'timescaledb/rails/model/aggregate_functions'
+
 module Timescaledb
   module Rails
     module Model
@@ -13,6 +15,8 @@ module Timescaledb
 
           select("time_bucket('#{format_interval_value(interval)}', #{target_column}) as #{TIME_BUCKET_ALIAS}")
             .group(TIME_BUCKET_ALIAS)
+            .order(TIME_BUCKET_ALIAS)
+            .extending(AggregateFunctions)
         end
 
         private
