@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
-require 'timescaledb/rails/model/scopes'
+require 'timescaledb/rails/model/finder_methods'
 require 'timescaledb/rails/model/hyperfunctions'
+require 'timescaledb/rails/model/scopes'
 
 module Timescaledb
   module Rails
@@ -15,27 +16,32 @@ module Timescaledb
 
       # :nodoc:
       module ClassMethods
-        delegate :time_column_name, to: :hypertable, prefix: true
-
+        include FinderMethods
         include Hyperfunctions
+
+        # @return [String]
+        def hypertable_time_column_name
+          @hypertable_time_column_name ||= hypertable&.time_column_name
+        end
 
         # Returns only the name of the hypertable, table_name could include
         # the schema path, we need to remove it.
         #
         # @return [String]
         def hypertable_name
-          table_name.split('.').last
+          @hypertable_name ||= table_name.split('.').last
         end
 
         # Returns the schema where hypertable is stored.
         #
         # @return [String]
         def hypertable_schema
-          if table_name.split('.').size > 1
-            table_name.split('.')[0..-2].join('.')
-          else
-            PUBLIC_SCHEMA_NAME
-          end
+          @hypertable_schema ||=
+            if table_name.split('.').size > 1
+              table_name.split('.')[0..-2].join('.')
+            else
+              PUBLIC_SCHEMA_NAME
+            end
         end
 
         # @return [Timescaledb::Rails::Hypertable]

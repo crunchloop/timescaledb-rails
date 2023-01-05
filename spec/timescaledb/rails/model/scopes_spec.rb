@@ -176,4 +176,53 @@ describe Timescaledb::Rails::Model::Scopes do
       expect(Payload.today.map(&:id)).not_to include(tomorrow_payload.id)
     end
   end
+
+  describe '.after' do
+    let!(:yesterday_payload) { create_payload(data: 'yesterday', created_at: 1.day.ago) }
+    let!(:today_payload) { create_payload(data: 'today', created_at: Time.current) }
+    let!(:tomorrow_payload) { create_payload(data: 'tomorrow', created_at: 1.day.from_now) }
+
+    after do
+      yesterday_payload.destroy
+      today_payload.destroy
+      tomorrow_payload.destroy
+    end
+
+    it 'includes records after given time' do
+      expect(Payload.after(1.hour.ago).map(&:id)).to match_array([today_payload.id, tomorrow_payload.id])
+    end
+  end
+
+  describe '.at_time' do
+    let!(:yesterday_payload) { create_payload(data: 'yesterday', created_at: 1.day.ago) }
+    let!(:today_payload) { create_payload(data: 'today', created_at: Time.current) }
+    let!(:tomorrow_payload) { create_payload(data: 'tomorrow', created_at: 1.day.from_now) }
+
+    after do
+      yesterday_payload.destroy
+      today_payload.destroy
+      tomorrow_payload.destroy
+    end
+
+    it 'includes records at given time' do
+      expect(Payload.at_time(yesterday_payload.created_at).map(&:id)).to match_array([yesterday_payload.id])
+    end
+  end
+
+  describe '.between' do
+    let!(:yesterday_payload) { create_payload(data: 'yesterday', created_at: 1.day.ago) }
+    let!(:today_payload) { create_payload(data: 'today', created_at: Time.current) }
+    let!(:tomorrow_payload) { create_payload(data: 'tomorrow', created_at: 1.day.from_now) }
+
+    after do
+      yesterday_payload.destroy
+      today_payload.destroy
+      tomorrow_payload.destroy
+    end
+
+    it 'includes records between given time' do
+      expect(Payload.between(Time.current.beginning_of_day, Time.current.end_of_day).map(&:id))
+        .to match_array([today_payload.id])
+    end
+  end
 end

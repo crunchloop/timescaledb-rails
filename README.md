@@ -96,13 +96,16 @@ end
 ### Models
 
 If one of your models need TimescaleDB support, just include `Timescaledb::Rails::Model`
+
 ```ruby
-class Event < ActiveRecord::Base
+class Payload < ActiveRecord::Base
   include Timescaledb::Rails::Model
+
+  self.primary_key = 'id'
 end
 ```
 
-If the hypertable does not belong to the default schema, don't forget to override `table_name`
+When hypertable belongs to a non default schema, don't forget to override `table_name`
 
 ```ruby
 class Event < ActiveRecord::Base
@@ -110,6 +113,19 @@ class Event < ActiveRecord::Base
 
   self.table_name = 'v1.events'
 end
+```
+
+Using `.find` is not recommended, to achieve more performat results, use these other find methods
+
+```ruby
+# When you know the exact time value
+Payload.find_at_time(111, Time.new(2022, 01, 01, 10, 15, 30))
+
+# If you know that the record occurred after a given time
+Payload.find_after(222, 11.days.ago)
+
+# Lastly, if you want to scope the search by a time range
+Payload.find_between(333, 1.week.ago, 1.day.ago)
 ```
 
 If you need to query data for a specific time period, `Timescaledb::Rails::Model` incluldes useful scopes
@@ -135,6 +151,19 @@ Here the list of all available scopes
 * this_week
 * yesterday
 * today
+
+If you still need to query data by other time periods, take a look at these other scopes
+
+```ruby
+# If you want to get all records that occurred in the last 30 minutes
+Event.after(30.minutes.ago) #=> [#<Event name...>, ...]
+
+# If you want to get records that occurred in the last 4 days, excluding today
+Event.between(4.days.ago, 1.day.ago) #=> [#<Event name...>, ...]
+
+# If you want to get records that occurred at a specific time
+Event.at_time(Time.new(2023, 01, 04, 10, 20, 30)) #=> [#<Event name...>, ...]
+```
 
 If you need information about your hypertable, use the following helper methods to get useful information
 
