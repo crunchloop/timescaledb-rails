@@ -213,7 +213,11 @@ Event.time_bucket(1.day, 'occurred_at')
 You may add aggregation like so:
 
 ```ruby
-Event.time_bucket(1.day).select('avg(target) as target_avg')
+Event.time_bucket(1.day).avg(:column)
+Event.time_bucket(1.day).sum(:column)
+Event.time_bucket(1.day).min(:column)
+Event.time_bucket(1.day).max(:column)
+Event.time_bucket(1.day).count
 ```
 
 ## Contributing
