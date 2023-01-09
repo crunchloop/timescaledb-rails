@@ -50,6 +50,24 @@ describe ActiveRecord::Tasks::DatabaseTasks do # rubocop:disable RSpec/FilePath
 
         expect(database_structure).to include("SELECT add_retention_policy('events', INTERVAL '1 year');")
       end
+
+      it 'includes create_continuous_aggregate statements' do # rubocop:disable RSpec/ExampleLength
+        interval = Rails.version.to_i >= 7 ? 'P1D' : '1 day'
+
+        described_class.dump_schema(database_configuration, :sql)
+
+        expect(database_structure).to include(
+          <<~SQL
+            CREATE MATERIALIZED VIEW temperature_events WITH (timescaledb.continuous) AS
+              SELECT time_bucket('#{interval}'::interval, events.created_at) AS time_bucket,
+                  avg(events.value) AS avg
+                 FROM events
+                WHERE ((events.event_type)::text = 'temperature'::text)
+                GROUP BY (time_bucket('#{interval}'::interval, events.created_at))
+                ORDER BY (time_bucket('#{interval}'::interval, events.created_at));
+          SQL
+        )
+      end
     end
 
     context 'when :ruby format' do
@@ -75,6 +93,25 @@ describe ActiveRecord::Tasks::DatabaseTasks do # rubocop:disable RSpec/FilePath
         described_class.dump_schema(database_configuration, :ruby)
 
         expect(database_structure).to include('add_hypertable_retention_policy "events", "1 year"')
+      end
+
+      it 'includes create_continuous_aggregate statements' do # rubocop:disable RSpec/ExampleLength
+        interval = Rails.version.to_i >= 7 ? 'P1D' : '1 day'
+
+        described_class.dump_schema(database_configuration, :ruby)
+
+        expect(database_structure).to include(
+          <<-QUERY
+  create_continuous_aggregate "temperature_events", <<-SQL
+    SELECT time_bucket('#{interval}'::interval, events.created_at) AS time_bucket,
+      avg(events.value) AS avg
+     FROM events
+    WHERE ((events.event_type)::text = 'temperature'::text)
+    GROUP BY (time_bucket('#{interval}'::interval, events.created_at))
+    ORDER BY (time_bucket('#{interval}'::interval, events.created_at));
+  SQL
+          QUERY
+        )
       end
     end
   end
