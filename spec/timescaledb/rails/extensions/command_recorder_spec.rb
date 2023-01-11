@@ -12,9 +12,9 @@ describe ActiveRecord::Migration::CommandRecorder do # rubocop:disable RSpec/Fil
         it 'returns drop_table' do
           block = -> {}
 
-          drop_table = recorder.inverse_of(:create_hypertable, %i[events created_at], &block)
+          create_hypertable_inverse = recorder.inverse_of(:create_hypertable, %i[events created_at], &block)
 
-          expect(drop_table).to eq([:drop_table, :events, block])
+          expect(create_hypertable_inverse).to eq([:drop_table, :events, block])
         end
       end
 
@@ -31,9 +31,9 @@ describe ActiveRecord::Migration::CommandRecorder do # rubocop:disable RSpec/Fil
       let(:params) { [:events, 20.days, { order_by: :name, segment_by: :created_at }] }
 
       it 'returns remove_hypertable_compression' do
-        add_hypertable_compression = recorder.inverse_of(:add_hypertable_compression, params)
+        add_hypertable_compression_inverse = recorder.inverse_of(:add_hypertable_compression, params)
 
-        expect(add_hypertable_compression).to eq([:remove_hypertable_compression, params, nil])
+        expect(add_hypertable_compression_inverse).to eq([:remove_hypertable_compression, params, nil])
       end
     end
 
@@ -42,9 +42,9 @@ describe ActiveRecord::Migration::CommandRecorder do # rubocop:disable RSpec/Fil
         let(:params) { [:events, 20.days, { segment_by: :created_at, order_by: :name }] }
 
         it 'returns add_hypertable_compression' do
-          remove_hypertable_compression = recorder.inverse_of(:remove_hypertable_compression, params)
+          remove_hypertable_compression_inverse = recorder.inverse_of(:remove_hypertable_compression, params)
 
-          expect(remove_hypertable_compression).to eq([:add_hypertable_compression, params, nil])
+          expect(remove_hypertable_compression_inverse).to eq([:add_hypertable_compression, params, nil])
         end
       end
 
@@ -61,9 +61,9 @@ describe ActiveRecord::Migration::CommandRecorder do # rubocop:disable RSpec/Fil
       let(:params) { [:events, 1.year, { order_by: :name, segment_by: :created_at }] }
 
       it 'returns remove_hypertable_retention_policy' do
-        add_hypertable_retention_policy = recorder.inverse_of(:add_hypertable_retention_policy, params)
+        add_hypertable_retention_policy_inverse = recorder.inverse_of(:add_hypertable_retention_policy, params)
 
-        expect(add_hypertable_retention_policy).to eq([:remove_hypertable_retention_policy, params, nil])
+        expect(add_hypertable_retention_policy_inverse).to eq([:remove_hypertable_retention_policy, params, nil])
       end
     end
 
@@ -72,9 +72,9 @@ describe ActiveRecord::Migration::CommandRecorder do # rubocop:disable RSpec/Fil
         let(:params) { [:events, 1.year, { segment_by: :created_at, order_by: :name }] }
 
         it 'returns add_hypertable_retention_policy' do
-          remove_hypertable_retention_policy = recorder.inverse_of(:remove_hypertable_retention_policy, params)
+          remove_hypertable_retention_policy_inverse = recorder.inverse_of(:remove_hypertable_retention_policy, params)
 
-          expect(remove_hypertable_retention_policy).to eq([:add_hypertable_retention_policy, params, nil])
+          expect(remove_hypertable_retention_policy_inverse).to eq([:add_hypertable_retention_policy, params, nil])
         end
       end
 
@@ -91,9 +91,9 @@ describe ActiveRecord::Migration::CommandRecorder do # rubocop:disable RSpec/Fil
       let(:params) { %i[events index_events_on_created_at_and_name] }
 
       it 'returns remove_hypertable_reorder_policy' do
-        add_hypertable_reorder_policy = recorder.inverse_of(:add_hypertable_reorder_policy, params)
+        add_hypertable_reorder_policy_inverse = recorder.inverse_of(:add_hypertable_reorder_policy, params)
 
-        expect(add_hypertable_reorder_policy).to eq([:remove_hypertable_reorder_policy, params, nil])
+        expect(add_hypertable_reorder_policy_inverse).to eq([:remove_hypertable_reorder_policy, params, nil])
       end
     end
 
@@ -102,9 +102,9 @@ describe ActiveRecord::Migration::CommandRecorder do # rubocop:disable RSpec/Fil
         let(:params) { %i[events index_events_on_created_at_and_name] }
 
         it 'returns add_hypertable_reorder_policy' do
-          remove_hypertable_reorder_policy = recorder.inverse_of(:remove_hypertable_reorder_policy, params)
+          remove_hypertable_reorder_policy_inverse = recorder.inverse_of(:remove_hypertable_reorder_policy, params)
 
-          expect(remove_hypertable_reorder_policy).to eq([:add_hypertable_reorder_policy, params, nil])
+          expect(remove_hypertable_reorder_policy_inverse).to eq([:add_hypertable_reorder_policy, params, nil])
         end
       end
 
@@ -112,6 +112,36 @@ describe ActiveRecord::Migration::CommandRecorder do # rubocop:disable RSpec/Fil
         it 'raises IrreversibleMigration error' do
           expect do
             recorder.inverse_of(:remove_hypertable_reorder_policy, %i[events])
+          end.to raise_error(ActiveRecord::IrreversibleMigration)
+        end
+      end
+    end
+
+    context 'when create_continuous_aggregate' do
+      let(:params) { [:temperature_events, Event.time_bucket(1.day).avg(:value).temperature.to_sql] }
+
+      it 'returns drop_continuous_aggregate' do
+        create_continuous_aggregate_inverse = recorder.inverse_of(:create_continuous_aggregate, params)
+
+        expect(create_continuous_aggregate_inverse).to eq([:drop_continuous_aggregate, params, nil])
+      end
+    end
+
+    context 'when drop_continuous_aggregate' do
+      context 'when given view name and view query' do
+        let(:params) { [:temperature_events, Event.time_bucket(1.day).avg(:value).temperature.to_sql] }
+
+        it 'returns create_continuous_aggregate' do
+          drop_continuous_aggregate_inverse = recorder.inverse_of(:drop_continuous_aggregate, params)
+
+          expect(drop_continuous_aggregate_inverse).to eq([:create_continuous_aggregate, params, nil])
+        end
+      end
+
+      context 'when given only view name' do
+        it 'raises IrreversibleMigration error' do
+          expect do
+            recorder.inverse_of(:drop_continuous_aggregate, %i[temperature_events])
           end.to raise_error(ActiveRecord::IrreversibleMigration)
         end
       end

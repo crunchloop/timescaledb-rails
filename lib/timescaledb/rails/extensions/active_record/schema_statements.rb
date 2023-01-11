@@ -106,6 +106,14 @@ module Timescaledb
           execute "CREATE MATERIALIZED VIEW #{view_name} WITH (timescaledb.continuous) AS #{view_query}"
         end
 
+        # Drops a continuous aggregate
+        #
+        #   drop_continuous_aggregate('temperature_events')
+        #
+        def drop_continuous_aggregate(view_name, _view_query = nil)
+          execute "DROP MATERIALIZED VIEW #{view_name};"
+        end
+
         # @return [String]
         def hypertable_options_to_sql(options)
           sql_statements = options.map do |option, value|
