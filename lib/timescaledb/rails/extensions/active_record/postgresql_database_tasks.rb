@@ -9,14 +9,19 @@ module Timescaledb
       # :nodoc:
       module PostgreSQLDatabaseTasks
         # @override
-        def structure_dump(filename, extra_flags) # rubocop:disable Metrics/MethodLength
+        def structure_dump(filename, extra_flags)
           extra_flags = Array(extra_flags)
-          extra_flags << timescale_structure_dump_default_flags if timescale_enabled?
+          extra_flags |= timescale_structure_dump_default_flags if timescale_enabled?
 
           super(filename, extra_flags)
 
           return unless timescale_enabled?
 
+          hypertables(filename)
+          continuous_aggregates(filename)
+        end
+
+        def hypertables(filename)
           File.open(filename, 'a') do |file|
             Timescaledb::Rails::Hypertable.all.each do |hypertable|
               drop_ts_insert_trigger_statment(hypertable, file)
@@ -24,6 +29,14 @@ module Timescaledb
               add_hypertable_compression_statement(hypertable, file)
               add_hypertable_reorder_policy_statement(hypertable, file)
               add_hypertable_retention_policy_statement(hypertable, file)
+            end
+          end
+        end
+
+        def continuous_aggregates(filename)
+          File.open(filename, 'a') do |file|
+            Timescaledb::Rails::ContinuousAggregate.all.each do |continuous_aggregate|
+              create_continuous_aggregate_statement(continuous_aggregate, file)
             end
           end
         end
@@ -62,6 +75,11 @@ module Timescaledb
           file << "SELECT add_retention_policy('#{hypertable.hypertable_name}', INTERVAL '#{hypertable.retention_policy_interval}');\n\n" # rubocop:disable Layout/LineLength
         end
 
+        def create_continuous_aggregate_statement(continuous_aggregate, file)
+          file << "CREATE MATERIALIZED VIEW #{continuous_aggregate.view_name} WITH (timescaledb.continuous) AS\n"
+          file << "#{continuous_aggregate.view_definition.strip.indent(2)}\n\n"
+        end
+
         def hypertable_options(hypertable)
           sql_statements = ["if_not_exists => 'TRUE'"]
           sql_statements << "chunk_time_interval => INTERVAL '#{hypertable.chunk_time_interval}'"
@@ -93,11 +111,18 @@ module Timescaledb
           hypertable.compression_segment_settings.map(&:attname)
         end
 
-        # Returns `pg_dump` flag to exclude `_timescaledb_internal` schema tables.
+        # Returns `pg_dump` flags to exclude `_timescaledb_internal` schema tables and
+        # exclude the corresponding continuous aggregate views.
         #
-        # @return [String]
+        # @return [Array<String>]
         def timescale_structure_dump_default_flags
-          '--exclude-schema=_timescaledb_internal'
+          flags = ['--exclude-schema=_timescaledb_internal']
+
+          Timescaledb::Rails::ContinuousAggregate.pluck(:view_name).each do |view_name|
+            flags << "--exclude-table=#{view_name}"
+          end
+
+          flags
         end
 
         # @return [Boolean]

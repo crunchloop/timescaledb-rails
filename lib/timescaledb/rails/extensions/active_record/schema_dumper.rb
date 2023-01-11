@@ -8,6 +8,38 @@ module Timescaledb
     module ActiveRecord
       # :nodoc:
       module SchemaDumper
+        # @override
+        def tables(stream)
+          super
+
+          continuous_aggregates(stream)
+          stream
+        end
+
+        def continuous_aggregates(stream)
+          return unless timescale_enabled?
+
+          continuous_aggregates = Timescaledb::Rails::ContinuousAggregate.pluck(:materialization_hypertable_name)
+
+          continuous_aggregates.each do |continuous_aggregate_name|
+            continuous_aggregate(continuous_aggregate_name, stream)
+          end
+        end
+
+        def continuous_aggregate(continuous_aggregate_name, stream)
+          continuous_aggregate = Timescaledb::Rails::ContinuousAggregate.find_by(
+            materialization_hypertable_name: continuous_aggregate_name
+          )
+
+          return if continuous_aggregate.nil?
+
+          stream.puts "  create_continuous_aggregate #{continuous_aggregate.view_name.inspect}, <<-SQL"
+          stream.puts "  #{continuous_aggregate.view_definition.strip.indent(2)}"
+          stream.puts '  SQL'
+          stream.puts
+        end
+
+        # @override
         def table(table, stream)
           super(table, stream)
 

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 6) do
+ActiveRecord::Schema.define(version: 7) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -23,6 +23,8 @@ ActiveRecord::Schema.define(version: 6) do
   end
 
   create_table "events", id: false, force: :cascade do |t|
+    t.integer "value", null: false
+    t.string "event_type", null: false
     t.string "name", null: false
     t.time "occurred_at", null: false
     t.time "recorded_at", null: false
@@ -54,5 +56,14 @@ ActiveRecord::Schema.define(version: 6) do
   end
 
   create_hypertable "payloads", "created_at", chunk_time_interval: "5 days"
+
+  create_continuous_aggregate "temperature_events", <<-SQL
+    SELECT time_bucket('1 day'::interval, events.created_at) AS time_bucket,
+      avg(events.value) AS avg
+     FROM events
+    WHERE ((events.event_type)::text = 'temperature'::text)
+    GROUP BY (time_bucket('1 day'::interval, events.created_at))
+    ORDER BY (time_bucket('1 day'::interval, events.created_at));
+  SQL
 
 end

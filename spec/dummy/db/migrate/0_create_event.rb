@@ -5,6 +5,9 @@ class CreateEvent < ActiveRecord::Migration[Rails.version[0..2]]
     execute 'create schema v1'
 
     create_table 'v1.events', id: false do |t|
+      t.integer :value, null: false
+
+      t.string :event_type, null: false
       t.string :name, null: false
 
       t.time :occurred_at, null: false

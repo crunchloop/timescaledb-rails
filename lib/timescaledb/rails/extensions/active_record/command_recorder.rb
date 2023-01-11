@@ -33,6 +33,10 @@ module Timescaledb
           record(:remove_hypertable_retention_policy, args, &block)
         end
 
+        def create_continuous_aggregate(*args, &block)
+          record(:create_continuous_aggregate, args, &block)
+        end
+
         def invert_create_hypertable(args, &block)
           if block.nil?
             raise ::ActiveRecord::IrreversibleMigration, 'create_hypertable is only reversible if given a block (can be empty).' # rubocop:disable Layout/LineLength

@@ -96,6 +96,16 @@ module Timescaledb
           execute "SELECT remove_reorder_policy('#{table_name}')"
         end
 
+        # Creates a continuous aggregate
+        #
+        #   create_continuous_aggregate(
+        #     'temperature_events', 'SELECT * FROM events where event_type_id = 1'
+        #   )
+        #
+        def create_continuous_aggregate(view_name, view_query)
+          execute "CREATE MATERIALIZED VIEW #{view_name} WITH (timescaledb.continuous) AS #{view_query}"
+        end
+
         # @return [String]
         def hypertable_options_to_sql(options)
           sql_statements = options.map do |option, value|
