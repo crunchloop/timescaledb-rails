@@ -38,6 +38,36 @@ module Timescaledb
         def find_after(id, from)
           after(from).find(id)
         end
+
+        # Finds the first records for a hypertable according to the value of one column as ordered by another.
+        #
+        # @param [String] target_column The column to find the first value for.
+        # @param [String] date_column The column to order by.
+        def first_for_hypertable(target_column, date_column = nil)
+          raise(no_hypertable_found_message) unless hypertable
+
+          date_column ||= hypertable.time_column_name
+
+          select("first(#{target_column}, #{date_column}) as first")
+        end
+
+        # Finds the last records for a hypertable according to the value of one column as ordered by another.
+        #
+        # @param [String] target_column The column to find the last value for.
+        # @param [String] date_column The column to order by.
+        def last_for_hypertable(target_column, date_column = nil)
+          raise(no_hypertable_found_message) unless hypertable
+
+          date_column ||= hypertable.time_column_name
+
+          select("last(#{target_column}, #{date_column}) as last")
+        end
+
+        private
+
+        def no_hypertable_found_message
+          "No hypertable found for #{self}"
+        end
       end
     end
   end

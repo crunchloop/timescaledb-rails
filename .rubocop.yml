@@ -22,7 +22,7 @@ RSpec/MessageSpies:
   EnforcedStyle: receive
 
 RSpec/NestedGroups:
-  Max: 4
+  Max: 5
 
 require:
   - rubocop-rspec
