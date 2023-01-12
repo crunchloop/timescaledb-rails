@@ -37,6 +37,7 @@ module Timescaledb
           File.open(filename, 'a') do |file|
             Timescaledb::Rails::ContinuousAggregate.all.each do |continuous_aggregate|
               create_continuous_aggregate_statement(continuous_aggregate, file)
+              add_continuous_aggregate_policy_statement(continuous_aggregate, file)
             end
           end
         end
@@ -78,6 +79,16 @@ module Timescaledb
         def create_continuous_aggregate_statement(continuous_aggregate, file)
           file << "CREATE MATERIALIZED VIEW #{continuous_aggregate.view_name} WITH (timescaledb.continuous) AS\n"
           file << "#{continuous_aggregate.view_definition.strip.indent(2)}\n\n"
+        end
+
+        def add_continuous_aggregate_policy_statement(continuous_aggregate, file)
+          return unless continuous_aggregate.refresh?
+
+          start_offset = continuous_aggregate.refresh_start_offset
+          end_offset = continuous_aggregate.refresh_end_offset
+          schedule_interval = continuous_aggregate.refresh_schedule_interval
+
+          file << "SELECT add_continuous_aggregate_policy('#{continuous_aggregate.view_name}', start_offset => INTERVAL '#{start_offset}', end_offset => INTERVAL '#{end_offset}', schedule_interval => INTERVAL '#{schedule_interval}');\n\n" # rubocop:disable Layout/LineLength
         end
 
         def hypertable_options(hypertable)

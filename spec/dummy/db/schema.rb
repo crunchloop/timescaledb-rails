@@ -66,4 +66,6 @@ ActiveRecord::Schema.define(version: 7) do
     ORDER BY (time_bucket('1 day'::interval, events.created_at));
   SQL
 
+  add_continuous_aggregate_policy "temperature_events", "1 month", "1 day", "1 hour"
+
 end

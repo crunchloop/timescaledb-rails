@@ -1,9 +1,13 @@
 # frozen_string_literal: true
 
+require 'timescaledb/rails/models/concerns/durationable'
+
 module Timescaledb
   module Rails
     # :nodoc:
     class Hypertable < ::ActiveRecord::Base
+      include Timescaledb::Rails::Models::Durationable
+
       self.table_name = 'timescaledb_information.hypertables'
       self.primary_key = 'hypertable_name'
 
@@ -85,13 +89,6 @@ module Timescaledb
       # @return [Dimension]
       def time_dimension
         @time_dimension ||= dimensions.time.first
-      end
-
-      # @return [String]
-      def parse_duration(duration)
-        ActiveSupport::Duration.parse(duration).inspect
-      rescue ActiveSupport::Duration::ISO8601Parser::ParsingError
-        duration
       end
     end
   end

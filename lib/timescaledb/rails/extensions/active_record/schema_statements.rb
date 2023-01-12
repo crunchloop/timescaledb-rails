@@ -114,6 +114,27 @@ module Timescaledb
           execute "DROP MATERIALIZED VIEW #{view_name};"
         end
 
+        # Adds refresh continuous aggregate policy
+        #
+        #   add_continuous_aggregate_policy('temperature_events', 1.month, 1.day, 1.hour)
+        #
+        def add_continuous_aggregate_policy(view_name, start_offset, end_offset, schedule_interval)
+          start_offset = start_offset.nil? ? 'NULL' : "INTERVAL '#{start_offset}'"
+          end_offset = end_offset.nil? ? 'NULL' : "INTERVAL '#{end_offset}'"
+          schedule_interval = schedule_interval.nil? ? 'NULL' : "INTERVAL '#{schedule_interval}'"
+
+          execute "SELECT add_continuous_aggregate_policy('#{view_name}', start_offset => #{start_offset}, end_offset => #{end_offset}, schedule_interval => #{schedule_interval});" # rubocop:disable Layout/LineLength
+        end
+
+        # Removes refresh continuous aggregate policy
+        #
+        #   remove_continuous_aggregate_policy('temperature_events')
+        #
+        def remove_continuous_aggregate_policy(view_name, _start_offset = nil,
+                                               _end_offset = nil, _schedule_interval = nil)
+          execute "SELECT remove_continuous_aggregate_policy('#{view_name}');"
+        end
+
         # @return [String]
         def hypertable_options_to_sql(options)
           sql_statements = options.map do |option, value|

@@ -14,6 +14,12 @@ describe Timescaledb::Rails::Models::Durationable do
   end
 
   describe '.parse_duration' do
+    context 'when given a duration that includes weeks' do
+      it 'converts them to days' do
+        expect(durationable.parse_duration('480:00:00')).to eq('20 days')
+      end
+    end
+
     context 'when given a duration text' do
       it 'returns the same value' do
         expect(durationable.parse_duration('1 day')).to eq('1 day')
@@ -22,7 +28,7 @@ describe Timescaledb::Rails::Models::Durationable do
 
     context 'when given a iso 8601 duration text' do
       it 'returns the expected duration value' do
-        expect(durationable.parse_duration('P1Y1D')).to eq('1 year and 1 day')
+        expect(durationable.parse_duration('P1Y1D')).to eq('1 year 1 day')
       end
     end
 

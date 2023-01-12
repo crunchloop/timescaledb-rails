@@ -41,6 +41,14 @@ module Timescaledb
           record(:drop_continuous_aggregate, args, &block)
         end
 
+        def add_continuous_aggregate_policy(*args, &block)
+          record(:add_continuous_aggregate_policy, args, &block)
+        end
+
+        def remove_continuous_aggregate_policy(*args, &block)
+          record(:remove_continuous_aggregate_policy, args, &block)
+        end
+
         def invert_create_hypertable(args, &block)
           if block.nil?
             raise ::ActiveRecord::IrreversibleMigration, 'create_hypertable is only reversible if given a block (can be empty).' # rubocop:disable Layout/LineLength
@@ -95,6 +103,18 @@ module Timescaledb
           end
 
           [:create_continuous_aggregate, args, block]
+        end
+
+        def invert_add_continuous_aggregate_policy(args, &block)
+          [:remove_continuous_aggregate_policy, args, block]
+        end
+
+        def invert_remove_continuous_aggregate_policy(args, &block)
+          if args.size < 4
+            raise ::ActiveRecord::IrreversibleMigration, 'remove_continuous_aggregate_policy is only reversible if given view name, start offset, end offset and schedule interval.' # rubocop:disable Layout/LineLength
+          end
+
+          [:add_continuous_aggregate_policy, args, block]
         end
       end
     end
