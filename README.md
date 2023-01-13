@@ -93,6 +93,31 @@ class AddEventReorderPolicy < ActiveRecord::Migration[7.0]
 end
 ```
 
+Create continuous aggregate
+
+```ruby
+class CreateTemperatureEventAggregate < ActiveRecord::Migration[7.0]
+  def up
+    create_continuous_aggregate(
+      :temperature_events,
+      Event.time_bucket(1.day).avg(:value).temperature.to_sql
+    )
+
+    add_continuous_aggregate_policy(:temperature_events, 1.month, 1.day, 1.hour)
+  end
+
+  def down
+    drop_continuous_aggregate(:temperature_events)
+
+    remove_continuous_aggregate_policy(:temperature_events)
+  end
+end
+```
+
+> **Reversible Migrations:**
+>
+> Above examples implement `up`/`down` methods to better document all the different APIs. Feel free to use `change` method, timescaledb-rails defines all the reverse calls for each API method so Active Record can automatically figure out how to reverse your migration.
+
 ### Models
 
 If one of your models need TimescaleDB support, just include `Timescaledb::Rails::Model`
