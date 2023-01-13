@@ -7,7 +7,7 @@ module Timescaledb
   module Rails
     module ActiveRecord
       # :nodoc:
-      module SchemaDumper
+      module SchemaDumper # rubocop:disable Metrics/ModuleLength
         # @override
         def tables(stream)
           super
@@ -19,23 +19,30 @@ module Timescaledb
         def continuous_aggregates(stream)
           return unless timescale_enabled?
 
-          continuous_aggregates = Timescaledb::Rails::ContinuousAggregate.pluck(:materialization_hypertable_name)
-
-          continuous_aggregates.each do |continuous_aggregate_name|
-            continuous_aggregate(continuous_aggregate_name, stream)
+          Timescaledb::Rails::ContinuousAggregate.all.each do |continuous_aggregate|
+            continuous_aggregate(continuous_aggregate, stream)
+            continuous_aggregate_policy(continuous_aggregate, stream)
           end
         end
 
-        def continuous_aggregate(continuous_aggregate_name, stream)
-          continuous_aggregate = Timescaledb::Rails::ContinuousAggregate.find_by(
-            materialization_hypertable_name: continuous_aggregate_name
-          )
-
-          return if continuous_aggregate.nil?
-
+        def continuous_aggregate(continuous_aggregate, stream)
           stream.puts "  create_continuous_aggregate #{continuous_aggregate.view_name.inspect}, <<-SQL"
           stream.puts "  #{continuous_aggregate.view_definition.strip.indent(2)}"
           stream.puts '  SQL'
+          stream.puts
+        end
+
+        def continuous_aggregate_policy(continuous_aggregate, stream)
+          return unless continuous_aggregate.refresh?
+
+          options = [
+            continuous_aggregate.view_name.inspect,
+            continuous_aggregate.refresh_start_offset.inspect,
+            continuous_aggregate.refresh_end_offset.inspect,
+            continuous_aggregate.refresh_schedule_interval.inspect
+          ]
+
+          stream.puts "  add_continuous_aggregate_policy #{options.join(', ')}"
           stream.puts
         end
 

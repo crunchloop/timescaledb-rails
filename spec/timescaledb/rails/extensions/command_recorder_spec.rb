@@ -146,5 +146,35 @@ describe ActiveRecord::Migration::CommandRecorder do # rubocop:disable RSpec/Fil
         end
       end
     end
+
+    context 'when add_continuous_aggregate_policy' do
+      let(:params) { [:temperature_events, 1.month, 1.day, 1.hour] }
+
+      it 'returns remove_continuous_aggregate_policy' do
+        add_continuous_aggregate_policy_inverse = recorder.inverse_of(:add_continuous_aggregate_policy, params)
+
+        expect(add_continuous_aggregate_policy_inverse).to eq([:remove_continuous_aggregate_policy, params, nil])
+      end
+    end
+
+    context 'when remove_continuous_aggregate_policy' do
+      context 'when given view name and view query' do
+        let(:params) { [:temperature_events, 1.month, 1.day, 1.hour] }
+
+        it 'returns add_continuous_aggregate_policy' do
+          remove_continuous_aggregate_policy_inverse = recorder.inverse_of(:remove_continuous_aggregate_policy, params)
+
+          expect(remove_continuous_aggregate_policy_inverse).to eq([:add_continuous_aggregate_policy, params, nil])
+        end
+      end
+
+      context 'when given only view name' do
+        it 'raises IrreversibleMigration error' do
+          expect do
+            recorder.inverse_of(:remove_continuous_aggregate_policy, %i[temperature_events])
+          end.to raise_error(ActiveRecord::IrreversibleMigration)
+        end
+      end
+    end
   end
 end

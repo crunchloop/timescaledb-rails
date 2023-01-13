@@ -68,6 +68,12 @@ describe ActiveRecord::Tasks::DatabaseTasks do # rubocop:disable RSpec/FilePath
           SQL
         )
       end
+
+      it 'includes add_continuous_aggregate_policy statements' do
+        described_class.dump_schema(database_configuration, :sql)
+
+        expect(database_structure).to include("SELECT add_continuous_aggregate_policy('temperature_events', start_offset => INTERVAL '1 month', end_offset => INTERVAL '1 day', schedule_interval => INTERVAL '1 hour');") # rubocop:disable Layout/LineLength
+      end
     end
 
     context 'when :ruby format' do
@@ -112,6 +118,13 @@ describe ActiveRecord::Tasks::DatabaseTasks do # rubocop:disable RSpec/FilePath
   SQL
           QUERY
         )
+      end
+
+      it 'includes add_continuous_aggregate_policy statements' do
+        described_class.dump_schema(database_configuration, :ruby)
+
+        expect(database_structure)
+          .to include('add_continuous_aggregate_policy "temperature_events", "1 month", "1 day", "1 hour"')
       end
     end
   end
