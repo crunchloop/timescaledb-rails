@@ -56,12 +56,13 @@ module Timescaledb
           execute "SELECT add_compression_policy('#{table_name}', INTERVAL '#{compress_after.inspect}')"
         end
 
-        # Disables compression from given table.
+        # Removes compression policy and disables compression from given hypertable.
         #
         #   remove_hypertable_compression('events')
         #
         def remove_hypertable_compression(table_name, compress_after = nil, segment_by: nil, order_by: nil) # rubocop:disable Lint/UnusedMethodArgument
           execute "SELECT remove_compression_policy('#{table_name.inspect}');"
+          execute "ALTER TABLE #{table_name.inspect} SET (timescaledb.compress = false);"
         end
 
         # Add a data retention policy to given hypertable.
