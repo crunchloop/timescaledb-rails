@@ -10,7 +10,7 @@ end
 class HypertableCustomSchema < ActiveRecord::Base
   include Timescaledb::Rails::Model
 
-  self.table_name = 'v1.events'
+  self.table_name = 'tdb.events'
 end
 
 class NonHypertable < ActiveRecord::Base
@@ -28,7 +28,7 @@ end
 class HypertableWithCompression < ActiveRecord::Base
   include Timescaledb::Rails::Model
 
-  self.table_name = 'v1.events'
+  self.table_name = 'tdb.events'
 end
 
 class HypertableWithoutCompression < ActiveRecord::Base
@@ -40,7 +40,7 @@ end
 class HypertableWithRetentionPolicy < ActiveRecord::Base
   include Timescaledb::Rails::Model
 
-  self.table_name = 'v1.events'
+  self.table_name = 'tdb.events'
 end
 
 class HypertableWithoutRetentionPolicy < ActiveRecord::Base

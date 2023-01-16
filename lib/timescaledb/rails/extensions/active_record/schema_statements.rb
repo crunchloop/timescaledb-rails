@@ -37,7 +37,7 @@ module Timescaledb
             create_table(table_name, id: false, primary_key: primary_key, force: force, **options, &block)
           end
 
-          execute "SELECT create_hypertable('#{table_name}', '#{time_column_name}', #{options_as_sql})"
+          execute "SELECT create_hypertable('#{table_name}', '#{time_column_name}', #{options_as_sql});"
         end
 
         # Enables compression and sets compression options.
@@ -51,9 +51,9 @@ module Timescaledb
           options << "timescaledb.compress_orderby = '#{order_by}'" unless order_by.nil?
           options << "timescaledb.compress_segmentby = '#{segment_by}'" unless segment_by.nil?
 
-          execute "ALTER TABLE #{table_name} SET (#{options.join(', ')})"
+          execute "ALTER TABLE #{table_name} SET (#{options.join(', ')});"
 
-          execute "SELECT add_compression_policy('#{table_name}', INTERVAL '#{compress_after.inspect}')"
+          execute "SELECT add_compression_policy('#{table_name}', INTERVAL '#{stringify_interval(compress_after)}');"
         end
 
         # Removes compression policy and disables compression from given hypertable.
@@ -61,7 +61,7 @@ module Timescaledb
         #   remove_hypertable_compression('events')
         #
         def remove_hypertable_compression(table_name, compress_after = nil, segment_by: nil, order_by: nil) # rubocop:disable Lint/UnusedMethodArgument
-          execute "SELECT remove_compression_policy('#{table_name.inspect}');"
+          execute "SELECT remove_compression_policy('#{table_name}');"
           execute "ALTER TABLE #{table_name.inspect} SET (timescaledb.compress = false);"
         end
 
@@ -70,7 +70,7 @@ module Timescaledb
         #   add_hypertable_retention_policy('events', 7.days)
         #
         def add_hypertable_retention_policy(table_name, drop_after)
-          execute "SELECT add_retention_policy('#{table_name}', INTERVAL '#{drop_after.inspect}')"
+          execute "SELECT add_retention_policy('#{table_name}', INTERVAL '#{stringify_interval(drop_after)}');"
         end
 
         # Removes data retention policy from given hypertable.
@@ -78,7 +78,7 @@ module Timescaledb
         #   remove_hypertable_retention_policy('events')
         #
         def remove_hypertable_retention_policy(table_name, _drop_after = nil)
-          execute "SELECT remove_retention_policy('#{table_name}')"
+          execute "SELECT remove_retention_policy('#{table_name}');"
         end
 
         # Adds a policy to reorder chunks on a given hypertable index in the background.
@@ -86,7 +86,7 @@ module Timescaledb
         #   add_hypertable_reorder_policy('events', 'index_events_on_created_at_and_name')
         #
         def add_hypertable_reorder_policy(table_name, index_name)
-          execute "SELECT add_reorder_policy('#{table_name}', '#{index_name}')"
+          execute "SELECT add_reorder_policy('#{table_name}', '#{index_name}');"
         end
 
         # Removes a policy to reorder a particular hypertable.
@@ -94,17 +94,17 @@ module Timescaledb
         #   remove_hypertable_reorder_policy('events')
         #
         def remove_hypertable_reorder_policy(table_name, _index_name = nil)
-          execute "SELECT remove_reorder_policy('#{table_name}')"
+          execute "SELECT remove_reorder_policy('#{table_name}');"
         end
 
         # Creates a continuous aggregate
         #
         #   create_continuous_aggregate(
-        #     'temperature_events', 'SELECT * FROM events where event_type_id = 1'
+        #     'temperature_events', "SELECT * FROM events where event_type = 'temperature'"
         #   )
         #
         def create_continuous_aggregate(view_name, view_query)
-          execute "CREATE MATERIALIZED VIEW #{view_name} WITH (timescaledb.continuous) AS #{view_query}"
+          execute "CREATE MATERIALIZED VIEW #{view_name} WITH (timescaledb.continuous) AS #{view_query};"
         end
 
         # Drops a continuous aggregate
@@ -120,9 +120,9 @@ module Timescaledb
         #   add_continuous_aggregate_policy('temperature_events', 1.month, 1.day, 1.hour)
         #
         def add_continuous_aggregate_policy(view_name, start_offset, end_offset, schedule_interval)
-          start_offset = start_offset.nil? ? 'NULL' : "INTERVAL '#{start_offset}'"
-          end_offset = end_offset.nil? ? 'NULL' : "INTERVAL '#{end_offset}'"
-          schedule_interval = schedule_interval.nil? ? 'NULL' : "INTERVAL '#{schedule_interval}'"
+          start_offset = start_offset.nil? ? 'NULL' : "INTERVAL '#{stringify_interval(start_offset)}'"
+          end_offset = end_offset.nil? ? 'NULL' : "INTERVAL '#{stringify_interval(end_offset)}'"
+          schedule_interval = schedule_interval.nil? ? 'NULL' : "INTERVAL '#{stringify_interval(schedule_interval)}'"
 
           execute "SELECT add_continuous_aggregate_policy('#{view_name}', start_offset => #{start_offset}, end_offset => #{end_offset}, schedule_interval => #{schedule_interval});" # rubocop:disable Layout/LineLength
         end
@@ -136,11 +136,18 @@ module Timescaledb
           execute "SELECT remove_continuous_aggregate_policy('#{view_name}');"
         end
 
+        private
+
+        # @param [ActiveSupport::Duration|String] interval
+        def stringify_interval(interval)
+          interval.is_a?(ActiveSupport::Duration) ? interval.inspect : interval
+        end
+
         # @return [String]
         def hypertable_options_to_sql(options)
           sql_statements = options.map do |option, value|
             case option
-            when :chunk_time_interval then "chunk_time_interval => INTERVAL '#{value}'"
+            when :chunk_time_interval then "chunk_time_interval => INTERVAL '#{stringify_interval(value)}'"
             when :if_not_exists then  "if_not_exists => #{value ? 'TRUE' : 'FALSE'}"
             end
           end

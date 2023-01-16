@@ -5,10 +5,10 @@ class CreateTemperatureEventAggregate < ActiveRecord::Migration[Rails.version[0.
 
   def change
     create_continuous_aggregate(
-      :temperature_events,
+      'public.temperature_events',
       Event.time_bucket(1.day).avg(:value).temperature.to_sql
     )
 
-    add_continuous_aggregate_policy(:temperature_events, 1.month, 1.day, 1.hour)
+    add_continuous_aggregate_policy('public.temperature_events', 10.days, 1.day, 1.hour)
   end
 end
