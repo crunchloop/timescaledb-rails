@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 class CreateEvent < ActiveRecord::Migration[Rails.version[0..2]]
-  def change
-    execute 'create schema v1'
+  def up
+    create_schema 'tdb'
 
-    create_table 'v1.events', id: false do |t|
+    create_table 'tdb.events', id: false do |t|
       t.integer :value, null: false
 
       t.string :event_type, null: false
@@ -17,5 +17,10 @@ class CreateEvent < ActiveRecord::Migration[Rails.version[0..2]]
     end
 
     add_index :events, %i[created_at name]
+  end
+
+  def down
+    drop_table :events
+    drop_schema 'tdb'
   end
 end

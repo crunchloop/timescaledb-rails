@@ -26,7 +26,7 @@ describe Timescaledb::Rails::Model do
 
     context 'when custom schema path' do
       it 'returns the expected schema' do
-        expect(HypertableCustomSchema.hypertable_schema).to eq('v1')
+        expect(HypertableCustomSchema.hypertable_schema).to eq('tdb')
       end
     end
   end
@@ -112,7 +112,7 @@ describe Timescaledb::Rails::Model do
     context 'with compression' do
       it 'includes all compression settings' do
         expect(HypertableWithCompression.hypertable_compression_settings.map(&:attname))
-          .to match_array(%w[event_type_id name occurred_at recorded_at created_at])
+          .to match_array(%w[event_type name occurred_at recorded_at created_at])
       end
     end
 

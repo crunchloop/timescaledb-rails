@@ -136,7 +136,7 @@ When hypertable belongs to a non default schema, don't forget to override `table
 class Event < ActiveRecord::Base
   include Timescaledb::Rails::Model
 
-  self.table_name = 'v1.events'
+  self.table_name = 'tdb.events'
 end
 ```
 

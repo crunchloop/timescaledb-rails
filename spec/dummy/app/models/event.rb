@@ -3,7 +3,7 @@
 class Event < ApplicationRecord
   include Timescaledb::Rails::Model
 
-  self.table_name = 'v1.events'
+  self.table_name = 'tdb.events'
 
   enum event_type: {
     temperature: 'temperature'

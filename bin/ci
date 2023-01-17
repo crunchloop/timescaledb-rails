@@ -17,3 +17,38 @@ echo "#######"
 echo "#########"
 
 bundle exec rubocop
+
+echo "#########"
+echo "#######"
+echo "##### Validate migrations"
+echo "#######"
+echo "#########"
+
+# Navigate to dummy spec project
+cd spec/dummy
+
+export DISABLE_DATABASE_ENVIRONMENT_CHECK=1
+export RAILS_ENV=test
+
+# Run rollbacks
+bundle exec rake db:migrate VERSION=0
+# Run migrations again
+bundle exec rake db:migrate
+
+# Dump both schema.rb and structure.sql
+bundle exec rake db:schema:dump db:structure:dump
+
+# Create a new clean database
+bundle exec rake db:drop db:create
+
+# Setup db using schema.rb
+bundle exec rake db:schema:load
+
+# Create a new clean database
+bundle exec rake db:drop db:create
+
+# Setup db using structure.sql
+bundle exec rake db:structure:load
+
+# Navigate back to root path
+cd ../..

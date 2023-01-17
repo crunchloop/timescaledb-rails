@@ -9,6 +9,7 @@ Gemfile.lock
 !/log/.keep
 !/tmp/.keep
 spec/dummy/log
+spec/dummy/db/structure.sql
 
 ## Environment normalization:
 /.bundle

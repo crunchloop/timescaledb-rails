@@ -3,6 +3,17 @@
 require 'spec_helper'
 
 describe ActiveRecord::Tasks::DatabaseTasks do # rubocop:disable RSpec/FilePath
+  before do
+    # Silence hypertables/chunks pg_dump/TimescaleDB warnings.
+    #
+    # https://github.com/timescale/timescaledb/issues/1581
+    if Rails.version.to_i >= 7
+      ActiveRecord.dump_schemas = :schema_search_path
+    else
+      ActiveRecord::Base.dump_schemas = :schema_search_path
+    end
+  end
+
   after { database_delete_structure_file! }
 
   describe '.dump_schema' do
@@ -18,37 +29,37 @@ describe ActiveRecord::Tasks::DatabaseTasks do # rubocop:disable RSpec/FilePath
       it 'includes ts_insert_blocker drop statements' do
         described_class.dump_schema(database_configuration, :sql)
 
-        expect(database_structure).to include('DROP TRIGGER IF EXISTS ts_insert_blocker ON v1.events;')
+        expect(database_structure).to include('DROP TRIGGER IF EXISTS ts_insert_blocker ON tdb.events;')
       end
 
       it 'includes create_hypertable statements' do
         described_class.dump_schema(database_configuration, :sql)
 
-        expect(database_structure).to include("SELECT create_hypertable('v1.events', 'created_at', if_not_exists => 'TRUE', chunk_time_interval => INTERVAL '2 days');") # rubocop:disable Layout/LineLength
+        expect(database_structure).to include("SELECT create_hypertable('tdb.events', 'created_at', if_not_exists => 'TRUE', chunk_time_interval => INTERVAL '2 days');") # rubocop:disable Layout/LineLength
       end
 
       it 'includes compression ALTER TABLE statements' do
         described_class.dump_schema(database_configuration, :sql)
 
-        expect(database_structure).to include("ALTER TABLE v1.events SET (timescaledb.compress, timescaledb.compress_segmentby = 'event_type_id, name', timescaledb.compress_orderby = 'occurred_at ASC, recorded_at DESC');") # rubocop:disable Layout/LineLength
+        expect(database_structure).to include("ALTER TABLE tdb.events SET (timescaledb.compress, timescaledb.compress_segmentby = 'event_type, name', timescaledb.compress_orderby = 'occurred_at ASC, recorded_at DESC');") # rubocop:disable Layout/LineLength
       end
 
       it 'includes add_compression_policy statements' do
         described_class.dump_schema(database_configuration, :sql)
 
-        expect(database_structure).to include("SELECT add_compression_policy('v1.events', INTERVAL '20 days');")
+        expect(database_structure).to include("SELECT add_compression_policy('tdb.events', INTERVAL '20 days');")
       end
 
       it 'includes add_reorder_policy statements' do
         described_class.dump_schema(database_configuration, :sql)
 
-        expect(database_structure).to include("SELECT add_reorder_policy('v1.events', 'index_events_on_created_at_and_name');") # rubocop:disable Layout/LineLength
+        expect(database_structure).to include("SELECT add_reorder_policy('tdb.events', 'index_events_on_created_at_and_name');") # rubocop:disable Layout/LineLength
       end
 
       it 'includes add_retention_policy statements' do
         described_class.dump_schema(database_configuration, :sql)
 
-        expect(database_structure).to include("SELECT add_retention_policy('v1.events', INTERVAL '1 year');")
+        expect(database_structure).to include("SELECT add_retention_policy('tdb.events', INTERVAL '1 year');")
       end
 
       it 'includes create_continuous_aggregate statements' do # rubocop:disable RSpec/ExampleLength
@@ -72,7 +83,7 @@ describe ActiveRecord::Tasks::DatabaseTasks do # rubocop:disable RSpec/FilePath
       it 'includes add_continuous_aggregate_policy statements' do
         described_class.dump_schema(database_configuration, :sql)
 
-        expect(database_structure).to include("SELECT add_continuous_aggregate_policy('public.temperature_events', start_offset => INTERVAL '1 month', end_offset => INTERVAL '1 day', schedule_interval => INTERVAL '1 hour');") # rubocop:disable Layout/LineLength
+        expect(database_structure).to include("SELECT add_continuous_aggregate_policy('public.temperature_events', start_offset => INTERVAL '10 days', end_offset => INTERVAL '1 day', schedule_interval => INTERVAL '1 hour');") # rubocop:disable Layout/LineLength
       end
     end
 
@@ -86,7 +97,7 @@ describe ActiveRecord::Tasks::DatabaseTasks do # rubocop:disable RSpec/FilePath
       it 'includes add_hypertable_compression statements' do
         described_class.dump_schema(database_configuration, :ruby)
 
-        expect(database_structure).to include('add_hypertable_compression "events", "20 days", segment_by: "event_type_id, name", order_by: "occurred_at ASC, recorded_at DESC"') # rubocop:disable Layout/LineLength
+        expect(database_structure).to include('add_hypertable_compression "events", "20 days", segment_by: "event_type, name", order_by: "occurred_at ASC, recorded_at DESC"') # rubocop:disable Layout/LineLength
       end
 
       it 'includes add_hypertable_reorder_policy statements' do
@@ -124,7 +135,7 @@ describe ActiveRecord::Tasks::DatabaseTasks do # rubocop:disable RSpec/FilePath
         described_class.dump_schema(database_configuration, :ruby)
 
         expect(database_structure)
-          .to include('add_continuous_aggregate_policy "temperature_events", "1 month", "1 day", "1 hour"')
+          .to include('add_continuous_aggregate_policy "temperature_events", "10 days", "1 day", "1 hour"')
       end
     end
   end
