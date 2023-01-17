@@ -13,6 +13,17 @@ module Timescaledb
 
       has_many :jobs, foreign_key: 'hypertable_name', class_name: 'Timescaledb::Rails::Job'
 
+      # Manually refresh a continuous aggregate.
+      #
+      # @param [DateTime] start_time
+      # @param [DateTime] end_time
+      #
+      def refresh!(start_time = 'NULL', end_time = 'NULL')
+        ::ActiveRecord::Base.connection.execute(
+          "CALL refresh_continuous_aggregate('#{view_name}', #{start_time}, #{end_time});"
+        )
+      end
+
       # @return [String]
       def refresh_start_offset
         parse_duration(refresh_job.config['start_offset'])
