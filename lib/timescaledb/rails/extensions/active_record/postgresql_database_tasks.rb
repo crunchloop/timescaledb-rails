@@ -7,6 +7,7 @@ module Timescaledb
   module Rails
     module ActiveRecord
       # :nodoc:
+      # rubocop:disable Layout/LineLength
       module PostgreSQLDatabaseTasks
         # @override
         def structure_dump(filename, extra_flags)
@@ -44,15 +45,15 @@ module Timescaledb
 
         def drop_ts_insert_trigger_statment(hypertable, file)
           file << "---\n"
-          file << "--- Drop ts_insert_blocker previously created by pg_dump to avoid pg errors, create_hypertable will re-create it again.\n" # rubocop:disable Layout/LineLength
+          file << "--- Drop ts_insert_blocker previously created by pg_dump to avoid pg errors, create_hypertable will re-create it again.\n"
           file << "---\n\n"
-          file << "DROP TRIGGER IF EXISTS ts_insert_blocker ON #{hypertable.hypertable_name};\n"
+          file << "DROP TRIGGER IF EXISTS ts_insert_blocker ON #{hypertable.hypertable_schema}.#{hypertable.hypertable_name};\n"
         end
 
         def create_hypertable_statement(hypertable, file)
           options = hypertable_options(hypertable)
 
-          file << "SELECT create_hypertable('#{hypertable.hypertable_name}', '#{hypertable.time_column_name}', #{options});\n\n" # rubocop:disable Layout/LineLength
+          file << "SELECT create_hypertable('#{hypertable.hypertable_schema}.#{hypertable.hypertable_name}', '#{hypertable.time_column_name}', #{options});\n\n"
         end
 
         def add_hypertable_compression_statement(hypertable, file)
@@ -60,24 +61,24 @@ module Timescaledb
 
           options = hypertable_compression_options(hypertable)
 
-          file << "ALTER TABLE #{hypertable.hypertable_name} SET (#{options});\n\n"
-          file << "SELECT add_compression_policy('#{hypertable.hypertable_name}', INTERVAL '#{hypertable.compression_policy_interval}');\n\n" # rubocop:disable Layout/LineLength
+          file << "ALTER TABLE #{hypertable.hypertable_schema}.#{hypertable.hypertable_name} SET (#{options});\n\n"
+          file << "SELECT add_compression_policy('#{hypertable.hypertable_schema}.#{hypertable.hypertable_name}', INTERVAL '#{hypertable.compression_policy_interval}');\n\n"
         end
 
         def add_hypertable_reorder_policy_statement(hypertable, file)
           return unless hypertable.reorder?
 
-          file << "SELECT add_reorder_policy('#{hypertable.hypertable_name}', '#{hypertable.reorder_policy_index_name}');\n\n" # rubocop:disable Layout/LineLength
+          file << "SELECT add_reorder_policy('#{hypertable.hypertable_schema}.#{hypertable.hypertable_name}', '#{hypertable.reorder_policy_index_name}');\n\n"
         end
 
         def add_hypertable_retention_policy_statement(hypertable, file)
           return unless hypertable.retention?
 
-          file << "SELECT add_retention_policy('#{hypertable.hypertable_name}', INTERVAL '#{hypertable.retention_policy_interval}');\n\n" # rubocop:disable Layout/LineLength
+          file << "SELECT add_retention_policy('#{hypertable.hypertable_schema}.#{hypertable.hypertable_name}', INTERVAL '#{hypertable.retention_policy_interval}');\n\n"
         end
 
         def create_continuous_aggregate_statement(continuous_aggregate, file)
-          file << "CREATE MATERIALIZED VIEW #{continuous_aggregate.view_name} WITH (timescaledb.continuous) AS\n"
+          file << "CREATE MATERIALIZED VIEW #{continuous_aggregate.view_schema}.#{continuous_aggregate.view_name} WITH (timescaledb.continuous) AS\n"
           file << "#{continuous_aggregate.view_definition.strip.indent(2)}\n\n"
         end
 
@@ -88,7 +89,7 @@ module Timescaledb
           end_offset = continuous_aggregate.refresh_end_offset
           schedule_interval = continuous_aggregate.refresh_schedule_interval
 
-          file << "SELECT add_continuous_aggregate_policy('#{continuous_aggregate.view_name}', start_offset => INTERVAL '#{start_offset}', end_offset => INTERVAL '#{end_offset}', schedule_interval => INTERVAL '#{schedule_interval}');\n\n" # rubocop:disable Layout/LineLength
+          file << "SELECT add_continuous_aggregate_policy('#{continuous_aggregate.view_schema}.#{continuous_aggregate.view_name}', start_offset => INTERVAL '#{start_offset}', end_offset => INTERVAL '#{end_offset}', schedule_interval => INTERVAL '#{schedule_interval}');\n\n"
         end
 
         def hypertable_options(hypertable)
@@ -129,8 +130,8 @@ module Timescaledb
         def timescale_structure_dump_default_flags
           flags = ['--exclude-schema=_timescaledb_internal']
 
-          Timescaledb::Rails::ContinuousAggregate.pluck(:view_name).each do |view_name|
-            flags << "--exclude-table=#{view_name}"
+          Timescaledb::Rails::ContinuousAggregate.pluck(:view_schema, :view_name).each do |view_schema, view_name|
+            flags << "--exclude-table=#{view_schema}.#{view_name}"
           end
 
           flags
@@ -141,6 +142,7 @@ module Timescaledb
           Timescaledb::Rails::Hypertable.table_exists?
         end
       end
+      # rubocop:enable Layout/LineLength
     end
   end
 end
