@@ -153,7 +153,7 @@ Payload.find_after(222, 11.days.ago)
 Payload.find_between(333, 1.week.ago, 1.day.ago)
 ```
 
-If you need to query data for a specific time period, `Timescaledb::Rails::Model` incluldes useful scopes
+If you need to query data for a specific time period, `Timescaledb::Rails::Model` includes useful scopes
 
 ```ruby
 # If you want to get all records from last year
@@ -217,6 +217,27 @@ chunk = Event.hypertable_chunks.first
 chunk.compress! unless chunk.is_compressed?
 
 chunk.decompress! if chunk.is_compressed?
+```
+
+If you need to reorder a specific chunk
+
+```ruby
+chunk = Event.hypertable_chunks.first
+
+# If an index is not specified, it will use the one from the reorder policy
+# In case there is no reorder policy index it will raise an ArgumentError
+chunk.reorder!
+
+# If an index is specified it will use that index
+chunk.reorder!(index)
+```
+
+If you need to manually refresh a continuous aggregate
+
+```ruby
+aggregate = Event.hypertable.continuous_aggregates.first
+
+aggregate.refresh!(5.days.ago, 1.day.ago)
 ```
 
 ### Hyperfunctions
