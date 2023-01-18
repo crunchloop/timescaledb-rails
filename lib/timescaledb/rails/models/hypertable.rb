@@ -11,6 +11,8 @@ module Timescaledb
       self.table_name = 'timescaledb_information.hypertables'
       self.primary_key = 'hypertable_name'
 
+      has_many :continuous_aggregates, foreign_key: 'hypertable_name',
+                                       class_name: 'Timescaledb::Rails::ContinuousAggregate'
       has_many :compression_settings, foreign_key: 'hypertable_name',
                                       class_name: 'Timescaledb::Rails::CompressionSetting'
       has_many :dimensions, foreign_key: 'hypertable_name', class_name: 'Timescaledb::Rails::Dimension'
