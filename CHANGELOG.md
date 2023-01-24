@@ -1,3 +1,82 @@
+##  0.1.5 (January 24, 2023) ##
+
+*   Add continuous aggregates refresh support
+
+    ```ruby
+    aggregate = Event.hypertable.continuous_aggregates.first
+
+    aggregate.refresh!(5.days.ago, 1.day.ago)
+    ```
+
+*   Add chunk reorder support
+
+    ```ruby
+    chunk = Event.hypertable.chunks.first
+
+    # If an index is not specified, it will use the one from the reorder policy
+    # In case there is no reorder policy index it will raise an ArgumentError
+    chunk.reorder!
+
+    # If an index is specified it will use that index
+    chunk.reorder!(index)
+    ```
+
+*   Add continuous aggregates migration APIs
+
+    ```ruby
+    class CreateTemperatureEventAggregate < ActiveRecord::Migration[7.0]
+      def up
+        create_continuous_aggregate(
+          :temperature_events,
+          Event.time_bucket(1.day).avg(:value).temperature.to_sql
+        )
+
+        add_continuous_aggregate_policy(:temperature_events, 1.month, 1.day, 1.hour)
+      end
+
+      def down
+        drop_continuous_aggregate(:temperature_events)
+
+        remove_continuous_aggregate_policy(:temperature_events)
+      end
+    end
+    ```
+
+*   Add finder APIs to Active Record models
+
+    ```ruby
+    # When you know the exact time value
+    Payload.find_at_time(111, Time.new(2022, 01, 01, 10, 15, 30))
+
+    # If you know that the record occurred after a given time
+    Payload.find_after(222, 11.days.ago)
+
+    # Lastly, if you want to scope the search by a time range
+    Payload.find_between(333, 1.week.ago, 1.day.ago)
+    ```
+
+*   Add time_bucket support to Active Record models
+
+    ```ruby
+    Event.time_bucket(1.day)
+
+    Event.time_bucket('1 day')
+
+    Event.time_bucket(1.day, :created_at)
+
+    Event.time_bucket(1.day, 'occurred_at')
+    ```
+
+    You may add aggregation like so:
+
+    ```ruby
+    Event.time_bucket(1.day).avg(:column)
+    Event.time_bucket(1.day).sum(:column)
+    Event.time_bucket(1.day).min(:column)
+    Event.time_bucket(1.day).max(:column)
+    Event.time_bucket(1.day).count
+    ```
+
 ##  0.1.4 (December 30, 2022) ##
 
 *   Add time scopes to Active Record models
