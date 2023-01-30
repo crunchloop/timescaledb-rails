@@ -57,8 +57,13 @@ module Timescaledb
       end
 
       # @return [Boolean]
-      def compression?
+      def compression_policy?
         compression_job.present?
+      end
+
+      # @return [Boolean]
+      def compression?
+        compression_settings.any?
       end
 
       # @return [Boolean]

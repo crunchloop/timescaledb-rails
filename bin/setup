@@ -10,7 +10,7 @@ for BUNDLE_GEMFILE in gemfiles/*.gemfile; do
   echo "########"
 
   # Install ruby dependencies
-  (BUNDLE_GEMFILE=$BUNDLE_GEMFILE; bundle check || bundle install)
+  BUNDLE_GEMFILE=$BUNDLE_GEMFILE bundle install
 done
 
 echo "########"

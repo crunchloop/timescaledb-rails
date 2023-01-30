@@ -40,29 +40,42 @@ module Timescaledb
           execute "SELECT create_hypertable('#{table_name}', '#{time_column_name}', #{options_as_sql});"
         end
 
-        # Enables compression and sets compression options.
+        # Enables compression on given hypertable.
         #
-        #   add_hypertable_compression('events', 7.days, segment_by: :created_at, order_by: :name)
+        #   enable_hypertable_compression('events', segment_by: :created_at, order_by: :name)
         #
-        def add_hypertable_compression(table_name, compress_after, segment_by: nil, order_by: nil)
-          compress_after = compress_after.inspect if compress_after.is_a?(ActiveSupport::Duration)
-
+        def enable_hypertable_compression(table_name, segment_by: nil, order_by: nil)
           options = ['timescaledb.compress']
           options << "timescaledb.compress_orderby = '#{order_by}'" unless order_by.nil?
           options << "timescaledb.compress_segmentby = '#{segment_by}'" unless segment_by.nil?
 
           execute "ALTER TABLE #{table_name} SET (#{options.join(', ')});"
+        end
+
+        # Disables compression on given hypertable.
+        #
+        #   disable_hypertable_compression('events')
+        #
+        def disable_hypertable_compression(table_name, _segment_by: nil, _order_by: nil)
+          execute "ALTER TABLE #{table_name} SET (timescaledb.compress = false);"
+        end
+
+        # Adds compression policy to given hypertable.
+        #
+        #   add_hypertable_compression_policy('events', 7.days)
+        #
+        def add_hypertable_compression_policy(table_name, compress_after)
+          compress_after = compress_after.inspect if compress_after.is_a?(ActiveSupport::Duration)
 
           execute "SELECT add_compression_policy('#{table_name}', INTERVAL '#{stringify_interval(compress_after)}');"
         end
 
-        # Removes compression policy and disables compression from given hypertable.
+        # Removes compression policy from the given hypertable.
         #
-        #   remove_hypertable_compression('events')
+        #   remove_hypertable_compression_policy('events')
         #
-        def remove_hypertable_compression(table_name, compress_after = nil, segment_by: nil, order_by: nil) # rubocop:disable Lint/UnusedMethodArgument
+        def remove_hypertable_compression_policy(table_name, _compress_after = nil)
           execute "SELECT remove_compression_policy('#{table_name}');"
-          execute "ALTER TABLE #{table_name.inspect} SET (timescaledb.compress = false);"
         end
 
         # Add a data retention policy to given hypertable.

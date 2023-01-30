@@ -51,16 +51,20 @@ class CreatePayloadHypertable < ActiveRecord::Migration[7.0]
 end
 ```
 
-Add hypertable compression
+Add hypertable compression policy
 
 ```ruby
-class AddEventCompression < ActiveRecord::Migration[7.0]
+class AddEventCompressionPolicy < ActiveRecord::Migration[7.0]
   def up
-    add_hypertable_compression :events, 20.days, segment_by: :name, order_by: 'occurred_at DESC'
+    enable_hypertable_compression :events, segment_by: :name, order_by: 'occurred_at DESC'
+
+    add_hypertable_compression_policy :events, 20.days
   end
 
   def down
-    remove_hypertable_compression :events
+    remove_hypertable_compression_policy :events
+
+    disable_hypertable_compression :events
   end
 end
 ```

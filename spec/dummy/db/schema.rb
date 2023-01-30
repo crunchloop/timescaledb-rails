@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 8) do
+ActiveRecord::Schema.define(version: 9) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
@@ -31,7 +31,9 @@ ActiveRecord::Schema.define(version: 8) do
 
   create_hypertable "events", "created_at", chunk_time_interval: "2 days"
 
-  add_hypertable_compression "events", "20 days", segment_by: "event_type, name", order_by: "occurred_at ASC, recorded_at DESC"
+  enable_hypertable_compression "events", segment_by: "event_type, name", order_by: "occurred_at ASC, recorded_at DESC"
+
+  add_hypertable_compression_policy "events", "20 days"
 
   add_hypertable_reorder_policy "events", "index_events_on_created_at_and_name"
 

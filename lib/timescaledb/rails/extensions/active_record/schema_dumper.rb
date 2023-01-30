@@ -55,8 +55,9 @@ module Timescaledb
 
           hypertable(hypertable, stream)
           hypertable_compression(hypertable, stream)
-          hypertable_reorder(hypertable, stream)
-          hypertable_retention(hypertable, stream)
+          hypertable_compression_policy(hypertable, stream)
+          hypertable_reorder_policy(hypertable, stream)
+          hypertable_retention_policy(hypertable, stream)
         end
 
         private
@@ -72,14 +73,22 @@ module Timescaledb
         def hypertable_compression(hypertable, stream)
           return unless hypertable.compression?
 
-          options = [hypertable.hypertable_name.inspect, hypertable.compression_policy_interval.inspect]
-          options |= hypertable_compression_options(hypertable)
+          options = [hypertable.hypertable_name.inspect, hypertable_compression_options(hypertable)]
 
-          stream.puts "  add_hypertable_compression #{options.join(', ')}"
+          stream.puts "  enable_hypertable_compression #{options.join(', ')}"
           stream.puts
         end
 
-        def hypertable_reorder(hypertable, stream)
+        def hypertable_compression_policy(hypertable, stream)
+          return unless hypertable.compression_policy?
+
+          options = [hypertable.hypertable_name.inspect, hypertable.compression_policy_interval.inspect]
+
+          stream.puts "  add_hypertable_compression_policy #{options.join(', ')}"
+          stream.puts
+        end
+
+        def hypertable_reorder_policy(hypertable, stream)
           return unless hypertable.reorder?
 
           options = [hypertable.hypertable_name.inspect, hypertable.reorder_policy_index_name.inspect]
@@ -88,7 +97,7 @@ module Timescaledb
           stream.puts
         end
 
-        def hypertable_retention(hypertable, stream)
+        def hypertable_retention_policy(hypertable, stream)
           return unless hypertable.retention?
 
           options = [hypertable.hypertable_name.inspect, hypertable.retention_policy_interval.inspect]

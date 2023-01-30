@@ -27,38 +27,61 @@ describe ActiveRecord::Migration::CommandRecorder do # rubocop:disable RSpec/Fil
       end
     end
 
-    context 'when add_hypertable_compression' do
-      let(:params) { [:events, 20.days, { order_by: :name, segment_by: :created_at }] }
+    context 'when enable_hypertable_compression' do
+      let(:params) { [:events, { segment_by: 'event_type, name', order_by: 'occurred_at ASC' }] }
 
-      it 'returns remove_hypertable_compression' do
-        add_hypertable_compression_inverse = recorder.inverse_of(:add_hypertable_compression, params)
+      it 'returns disable_hypertable_compression' do
+        enable_hypertable_compression_inverse = recorder.inverse_of(:enable_hypertable_compression, params)
 
-        expect(add_hypertable_compression_inverse).to eq([:remove_hypertable_compression, params, nil])
+        expect(enable_hypertable_compression_inverse).to eq([:disable_hypertable_compression, params, nil])
       end
     end
 
-    context 'when remove_hypertable_compression' do
+    context 'when disable_hypertable_compression' do
+      let(:params) { [:events, { segment_by: 'event_type, name', order_by: 'occurred_at ASC' }] }
+
+      it 'returns enable_hypertable_compression' do
+        disable_hypertable_compression_inverse = recorder.inverse_of(:disable_hypertable_compression, params)
+
+        expect(disable_hypertable_compression_inverse).to eq([:enable_hypertable_compression, params, nil])
+      end
+    end
+
+    context 'when add_hypertable_compression_policy' do
+      let(:params) { [:events, 20.days] }
+
+      it 'returns remove_hypertable_compression_policy' do
+        add_hypertable_compression_policy_inverse = recorder.inverse_of(:add_hypertable_compression_policy, params)
+
+        expect(add_hypertable_compression_policy_inverse).to eq([:remove_hypertable_compression_policy, params, nil])
+      end
+    end
+
+    context 'when remove_hypertable_compression_policy' do
       context 'when given table name and compress after' do
-        let(:params) { [:events, 20.days, { segment_by: :created_at, order_by: :name }] }
+        let(:params) { [:events, 20.days] }
 
-        it 'returns add_hypertable_compression' do
-          remove_hypertable_compression_inverse = recorder.inverse_of(:remove_hypertable_compression, params)
+        it 'returns add_hypertable_compression_policy' do
+          remove_hypertable_compression_policy_inverse = recorder.inverse_of(
+            :remove_hypertable_compression_policy,
+            params
+          )
 
-          expect(remove_hypertable_compression_inverse).to eq([:add_hypertable_compression, params, nil])
+          expect(remove_hypertable_compression_policy_inverse).to eq([:add_hypertable_compression_policy, params, nil])
         end
       end
 
       context 'when given only table name' do
         it 'raises IrreversibleMigration error' do
           expect do
-            recorder.inverse_of(:remove_hypertable_compression, %i[events])
+            recorder.inverse_of(:remove_hypertable_compression_policy, %i[events])
           end.to raise_error(ActiveRecord::IrreversibleMigration)
         end
       end
     end
 
     context 'when add_hypertable_retention_policy' do
-      let(:params) { [:events, 1.year, { order_by: :name, segment_by: :created_at }] }
+      let(:params) { [:events, 1.year] }
 
       it 'returns remove_hypertable_retention_policy' do
         add_hypertable_retention_policy_inverse = recorder.inverse_of(:add_hypertable_retention_policy, params)
@@ -69,7 +92,7 @@ describe ActiveRecord::Migration::CommandRecorder do # rubocop:disable RSpec/Fil
 
     context 'when remove_hypertable_retention_policy' do
       context 'when given table name and compress after' do
-        let(:params) { [:events, 1.year, { segment_by: :created_at, order_by: :name }] }
+        let(:params) { [:events, 1.year] }
 
         it 'returns add_hypertable_retention_policy' do
           remove_hypertable_retention_policy_inverse = recorder.inverse_of(:remove_hypertable_retention_policy, params)
