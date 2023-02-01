@@ -27,7 +27,8 @@ module Timescaledb
             Timescaledb::Rails::Hypertable.all.each do |hypertable|
               drop_ts_insert_trigger_statment(hypertable, file)
               create_hypertable_statement(hypertable, file)
-              add_hypertable_compression_statement(hypertable, file)
+              enable_hypertable_compression_statement(hypertable, file)
+              add_hypertable_compression_policy_statement(hypertable, file)
               add_hypertable_reorder_policy_statement(hypertable, file)
               add_hypertable_retention_policy_statement(hypertable, file)
             end
@@ -56,12 +57,17 @@ module Timescaledb
           file << "SELECT create_hypertable('#{hypertable.hypertable_schema}.#{hypertable.hypertable_name}', '#{hypertable.time_column_name}', #{options});\n\n"
         end
 
-        def add_hypertable_compression_statement(hypertable, file)
+        def enable_hypertable_compression_statement(hypertable, file)
           return unless hypertable.compression?
 
           options = hypertable_compression_options(hypertable)
 
           file << "ALTER TABLE #{hypertable.hypertable_schema}.#{hypertable.hypertable_name} SET (#{options});\n\n"
+        end
+
+        def add_hypertable_compression_policy_statement(hypertable, file)
+          return unless hypertable.compression_policy?
+
           file << "SELECT add_compression_policy('#{hypertable.hypertable_schema}.#{hypertable.hypertable_name}', INTERVAL '#{hypertable.compression_policy_interval}');\n\n"
         end
 

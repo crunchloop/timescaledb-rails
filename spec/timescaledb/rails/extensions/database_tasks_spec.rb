@@ -94,10 +94,16 @@ describe ActiveRecord::Tasks::DatabaseTasks do # rubocop:disable RSpec/FilePath
         expect(database_structure).to include('create_hypertable "events", "created_at", chunk_time_interval: "2 days"')
       end
 
-      it 'includes add_hypertable_compression statements' do
+      it 'includes enable_hypertable_compression statements' do
         described_class.dump_schema(database_configuration, :ruby)
 
-        expect(database_structure).to include('add_hypertable_compression "events", "20 days", segment_by: "event_type, name", order_by: "occurred_at ASC, recorded_at DESC"') # rubocop:disable Layout/LineLength
+        expect(database_structure).to include('enable_hypertable_compression "events", segment_by: "event_type, name", order_by: "occurred_at ASC, recorded_at DESC"') # rubocop:disable Layout/LineLength
+      end
+
+      it 'includes add_hypertable_compression_policy statements' do
+        described_class.dump_schema(database_configuration, :ruby)
+
+        expect(database_structure).to include('add_hypertable_compression_policy "events", "20 days"')
       end
 
       it 'includes add_hypertable_reorder_policy statements' do
