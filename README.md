@@ -101,6 +101,8 @@ Create continuous aggregate
 
 ```ruby
 class CreateTemperatureEventAggregate < ActiveRecord::Migration[7.0]
+  disable_ddl_transaction!
+
   def up
     create_continuous_aggregate(
       :temperature_events,
