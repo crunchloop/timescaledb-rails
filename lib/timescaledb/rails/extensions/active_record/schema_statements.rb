@@ -116,8 +116,15 @@ module Timescaledb
         #     'temperature_events', "SELECT * FROM events where event_type = 'temperature'"
         #   )
         #
-        def create_continuous_aggregate(view_name, view_query)
-          execute "CREATE MATERIALIZED VIEW #{view_name} WITH (timescaledb.continuous) AS #{view_query};"
+        def create_continuous_aggregate(view_name, view_query, force: false)
+          if force
+            execute "DROP MATERIALIZED VIEW #{quote_table_name(view_name)} CASCADE;" if view_exists? view_name
+          else
+            schema_cache.clear_data_source_cache!(view_name.to_s)
+          end
+
+          execute "CREATE MATERIALIZED VIEW #{quote_table_name(view_name)} " \
+                  "WITH (timescaledb.continuous) AS #{view_query};"
         end
 
         # Drops a continuous aggregate

@@ -3,7 +3,7 @@
 module Timescaledb
   module Rails
     # :nodoc:
-    class Chunk < ::ActiveRecord::Base
+    class Chunk < Railtie.config.record_base.constantize
       self.table_name = 'timescaledb_information.chunks'
       self.primary_key = 'hypertable_name'
 
@@ -17,13 +17,13 @@ module Timescaledb
       end
 
       def compress!
-        ::ActiveRecord::Base.connection.execute(
+        self.class.connection.execute(
           "SELECT compress_chunk('#{chunk_full_name}')"
         )
       end
 
       def decompress!
-        ::ActiveRecord::Base.connection.execute(
+        self.class.connection.execute(
           "SELECT decompress_chunk('#{chunk_full_name}')"
         )
       end
@@ -40,7 +40,7 @@ module Timescaledb
         options = ["'#{chunk_full_name}'"]
         options << "'#{index}'" if index.present?
 
-        ::ActiveRecord::Base.connection.execute(
+        self.class.connection.execute(
           "SELECT reorder_chunk(#{options.join(', ')})"
         )
       end

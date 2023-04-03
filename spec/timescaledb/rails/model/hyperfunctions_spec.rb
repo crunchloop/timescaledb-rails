@@ -40,7 +40,7 @@ describe Timescaledb::Rails::Model::Hyperfunctions do
         it 'uses the default date column' do
           result = Payload.time_bucket(interval)
 
-          expect(result.to_sql).to include("SELECT time_bucket('1 day', created_at) as time_bucket")
+          expect(result.to_sql).to include("SELECT time_bucket('1 day', \"payloads\".\"created_at\") AS time_bucket")
         end
 
         it 'returns an active record relation' do
@@ -78,7 +78,7 @@ describe Timescaledb::Rails::Model::Hyperfunctions do
       it 'uses the specified date column' do
         result = Payload.time_bucket(interval, date_column)
 
-        expect(result.to_sql).to include("SELECT time_bucket('1 day', #{date_column}) as time_bucket")
+        expect(result.to_sql).to include("SELECT time_bucket('1 day', #{date_column}) AS time_bucket")
       end
 
       context 'when the interval is a string' do

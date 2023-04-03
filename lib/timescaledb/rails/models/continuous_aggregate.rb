@@ -5,7 +5,7 @@ require 'timescaledb/rails/models/concerns/durationable'
 module Timescaledb
   module Rails
     # :nodoc:
-    class ContinuousAggregate < ::ActiveRecord::Base
+    class ContinuousAggregate < Railtie.config.record_base.constantize
       include Timescaledb::Rails::Models::Durationable
 
       self.table_name = 'timescaledb_information.continuous_aggregates'
@@ -19,7 +19,7 @@ module Timescaledb
       # @param [DateTime] end_time
       #
       def refresh!(start_time = 'NULL', end_time = 'NULL')
-        ::ActiveRecord::Base.connection.execute(
+        self.class.connection.execute(
           "CALL refresh_continuous_aggregate('#{view_name}', #{start_time}, #{end_time});"
         )
       end

@@ -2,6 +2,7 @@
 
 require 'active_record/connection_adapters/postgresql_adapter'
 require 'timescaledb/rails/orderby_compression'
+require 'tsort'
 
 module Timescaledb
   module Rails
@@ -19,14 +20,20 @@ module Timescaledb
         def continuous_aggregates(stream)
           return unless timescale_enabled?
 
-          Timescaledb::Rails::ContinuousAggregate.all.each do |continuous_aggregate|
-            continuous_aggregate(continuous_aggregate, stream)
-            continuous_aggregate_policy(continuous_aggregate, stream)
+          deps = Timescaledb::Rails::ContinuousAggregate.find_each.index_by(&:materialization_hypertable_name)
+
+          TSort.tsort(
+            ->(&b) { deps.each_value(&b) },
+            ->(n, &b) { Array.wrap(deps[n.hypertable_name]).each(&b) }
+          ).each do |ca|
+            continuous_aggregate(ca, stream)
+            continuous_aggregate_policy(ca, stream)
           end
         end
 
-        def continuous_aggregate(continuous_aggregate, stream)
-          stream.puts "  create_continuous_aggregate #{continuous_aggregate.view_name.inspect}, <<-SQL"
+        def continuous_aggregate(continuous_aggregate, stream, force: false)
+          stream.puts "  create_continuous_aggregate #{continuous_aggregate.view_name.inspect}, <<-SQL, " \
+                      "force: #{force.inspect}"
           stream.puts "  #{continuous_aggregate.view_definition.strip.indent(2)}"
           stream.puts '  SQL'
           stream.puts
@@ -149,7 +156,8 @@ module Timescaledb
         end
 
         def timescale_enabled?
-          Timescaledb::Rails::Hypertable.table_exists?
+          @connection.pool.db_config.name == Timescaledb::Rails::Hypertable.connection.pool.db_config.name &&
+            Timescaledb::Rails::Hypertable.table_exists?
         end
       end
     end

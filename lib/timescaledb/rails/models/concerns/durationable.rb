@@ -11,6 +11,8 @@ module Timescaledb
 
         # @return [String]
         def parse_duration(duration)
+          return if duration.nil?
+
           duration_in_seconds = duration_in_seconds(duration)
 
           duration_to_interval(
