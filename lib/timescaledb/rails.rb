@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require_relative './rails/railtie'
 require_relative './rails/model'
 
 require_relative './rails/extensions/active_record/base'

@@ -3,7 +3,7 @@
 module Timescaledb
   module Rails
     # :nodoc:
-    class Dimension < Railtie.config.record_base.constantize
+    class Dimension < ApplicationRecord
       TIME_TYPE = 'Time'
 
       self.table_name = 'timescaledb_information.dimensions'

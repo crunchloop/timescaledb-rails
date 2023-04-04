@@ -3,7 +3,7 @@
 module Timescaledb
   module Rails
     # :nodoc:
-    class CompressionSetting < Railtie.config.record_base.constantize
+    class CompressionSetting < ApplicationRecord
       self.table_name = 'timescaledb_information.compression_settings'
       self.primary_key = 'hypertable_name'
 

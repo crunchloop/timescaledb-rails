@@ -3,7 +3,7 @@
 module Timescaledb
   module Rails
     # :nodoc:
-    class Job < Railtie.config.record_base.constantize
+    class Job < ApplicationRecord
       self.table_name = 'timescaledb_information.jobs'
       self.primary_key = 'hypertable_name'
 

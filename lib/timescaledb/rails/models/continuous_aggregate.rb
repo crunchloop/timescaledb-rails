@@ -5,7 +5,7 @@ require 'timescaledb/rails/models/concerns/durationable'
 module Timescaledb
   module Rails
     # :nodoc:
-    class ContinuousAggregate < Railtie.config.record_base.constantize
+    class ContinuousAggregate < ApplicationRecord
       include Timescaledb::Rails::Models::Durationable
 
       self.table_name = 'timescaledb_information.continuous_aggregates'

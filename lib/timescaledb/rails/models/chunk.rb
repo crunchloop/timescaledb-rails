@@ -3,7 +3,7 @@
 module Timescaledb
   module Rails
     # :nodoc:
-    class Chunk < Railtie.config.record_base.constantize
+    class Chunk < ApplicationRecord
       self.table_name = 'timescaledb_information.chunks'
       self.primary_key = 'hypertable_name'
 

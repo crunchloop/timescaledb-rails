@@ -5,7 +5,7 @@ require 'timescaledb/rails/models/concerns/durationable'
 module Timescaledb
   module Rails
     # :nodoc:
-    class Hypertable < Railtie.config.record_base.constantize
+    class Hypertable < ApplicationRecord
       include Timescaledb::Rails::Models::Durationable
 
       self.table_name = 'timescaledb_information.hypertables'
