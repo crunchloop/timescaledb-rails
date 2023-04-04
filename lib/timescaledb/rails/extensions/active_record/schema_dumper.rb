@@ -26,9 +26,8 @@ module Timescaledb
           end
         end
 
-        def continuous_aggregate(continuous_aggregate, stream, force: false)
-          stream.puts "  create_continuous_aggregate #{continuous_aggregate.view_name.inspect}, <<-SQL, " \
-                      "force: #{force.inspect}"
+        def continuous_aggregate(continuous_aggregate, stream)
+          stream.puts "  create_continuous_aggregate #{continuous_aggregate.view_name.inspect}, <<-SQL"
           stream.puts "  #{continuous_aggregate.view_definition.strip.indent(2)}"
           stream.puts '  SQL'
           stream.puts
