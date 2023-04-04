@@ -125,7 +125,7 @@ describe ActiveRecord::Tasks::DatabaseTasks do # rubocop:disable RSpec/FilePath
 
         expect(database_structure).to include(
           <<-QUERY
-  create_continuous_aggregate "temperature_events", <<-SQL, force: false
+  create_continuous_aggregate "temperature_events", <<-SQL
     SELECT time_bucket('#{interval}'::interval, events.created_at) AS time_bucket,
       avg(events.value) AS avg
      FROM events
