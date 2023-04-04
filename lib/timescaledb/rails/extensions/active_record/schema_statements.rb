@@ -56,7 +56,7 @@ module Timescaledb
         #
         #   disable_hypertable_compression('events')
         #
-        def disable_hypertable_compression(table_name, _segment_by: nil, _order_by: nil)
+        def disable_hypertable_compression(table_name, segment_by: nil, order_by: nil) # rubocop:disable Lint/UnusedMethodArgument
           execute "ALTER TABLE #{table_name} SET (timescaledb.compress = false);"
         end
 
@@ -131,7 +131,7 @@ module Timescaledb
         #
         #   drop_continuous_aggregate('temperature_events')
         #
-        def drop_continuous_aggregate(view_name, _view_query = nil)
+        def drop_continuous_aggregate(view_name, _view_query = nil, force: false) # rubocop:disable Lint/UnusedMethodArgument
           execute "DROP MATERIALIZED VIEW #{view_name};"
         end
 
