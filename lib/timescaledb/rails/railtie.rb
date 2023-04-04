@@ -6,8 +6,6 @@ module Timescaledb
   module Rails
     # :nodoc:
     class Railtie < ::Rails::Railtie
-      config.record_base = '::ActiveRecord::Base'
-
       config.to_prepare do
         ActiveSupport.on_load(:active_record) do
           require 'timescaledb/rails/models'
