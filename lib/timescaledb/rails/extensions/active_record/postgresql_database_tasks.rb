@@ -37,7 +37,7 @@ module Timescaledb
 
         def continuous_aggregates(filename)
           File.open(filename, 'a') do |file|
-            Timescaledb::Rails::ContinuousAggregate.all.each do |continuous_aggregate|
+            Timescaledb::Rails::ContinuousAggregate.dependency_ordered.each do |continuous_aggregate|
               create_continuous_aggregate_statement(continuous_aggregate, file)
               add_continuous_aggregate_policy_statement(continuous_aggregate, file)
             end

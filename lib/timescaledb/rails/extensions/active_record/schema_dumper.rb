@@ -20,12 +20,7 @@ module Timescaledb
         def continuous_aggregates(stream)
           return unless timescale_enabled?
 
-          deps = Timescaledb::Rails::ContinuousAggregate.find_each.index_by(&:materialization_hypertable_name)
-
-          TSort.tsort(
-            ->(&b) { deps.each_value(&b) },
-            ->(n, &b) { Array.wrap(deps[n.hypertable_name]).each(&b) }
-          ).each do |ca|
+          Timescaledb::Rails::ContinuousAggregate.dependency_ordered.each do |ca|
             continuous_aggregate(ca, stream)
             continuous_aggregate_policy(ca, stream)
           end

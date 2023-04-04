@@ -13,6 +13,15 @@ module Timescaledb
 
       has_many :jobs, foreign_key: 'hypertable_name', class_name: 'Timescaledb::Rails::Job'
 
+      def self.dependency_ordered
+        deps = find_each.index_by(&:materialization_hypertable_name)
+
+        TSort.tsort_each(
+          ->(&b) { deps.each_value.sort_by(&:hypertable_name).each(&b) },
+          ->(n, &b) { Array.wrap(deps[n.hypertable_name]).each(&b) }
+        )
+      end
+
       # Manually refresh a continuous aggregate.
       #
       # @param [DateTime] start_time
