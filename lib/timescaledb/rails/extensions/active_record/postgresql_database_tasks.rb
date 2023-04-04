@@ -8,7 +8,7 @@ module Timescaledb
     module ActiveRecord
       # :nodoc:
       # rubocop:disable Layout/LineLength
-      module PostgreSQLDatabaseTasks
+      module PostgreSQLDatabaseTasks # rubocop:disable Metrics/ModuleLength
         # @override
         def structure_dump(filename, extra_flags)
           extra_flags = Array(extra_flags)
@@ -145,7 +145,18 @@ module Timescaledb
 
         # @return [Boolean]
         def timescale_enabled?
-          Timescaledb::Rails::Hypertable.table_exists?
+          pool_name(connection.pool) == pool_name(Timescaledb::Rails::Hypertable.connection.pool) &&
+            Timescaledb::Rails::Hypertable.table_exists?
+        end
+
+        def pool_name(pool)
+          if pool.respond_to?(:db_config)
+            pool.db_config.name
+          elsif pool.respond_to?(:spec)
+            pool.spec.name
+          else
+            raise "Don't know how to get pool name from #{pool.inspect}"
+          end
         end
       end
       # rubocop:enable Layout/LineLength
