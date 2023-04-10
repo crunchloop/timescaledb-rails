@@ -2,7 +2,6 @@
 
 require 'active_record/connection_adapters/postgresql_adapter'
 require 'timescaledb/rails/orderby_compression'
-require 'tsort'
 
 module Timescaledb
   module Rails
