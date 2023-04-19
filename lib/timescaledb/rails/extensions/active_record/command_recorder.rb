@@ -25,7 +25,7 @@ module Timescaledb
               record(:"#{method}", args, &block)  #   record(:create_table, args, &block)
             end                                   # end
           METHOD
-          ruby2_keywords(method)
+          ruby2_keywords(method) if respond_to?(:ruby2_keywords)
         end
 
         def invert_create_hypertable(args, &block)
