@@ -149,7 +149,7 @@ module Timescaledb
         end
 
         def timescale_enabled?
-          ApplicationRecord.timescale_connection?(@connection)
+          ApplicationRecord.timescale_connection?(@connection) && Hypertable.table_exists?
         end
       end
     end

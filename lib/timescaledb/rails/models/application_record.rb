@@ -17,7 +17,7 @@ module Timescaledb
           end
         end
 
-        pool_name[connection.pool] == pool_name[self.connection.pool] && Hypertable.table_exists?
+        pool_name[connection.pool] == pool_name[self.connection.pool]
       end
     end
   end
