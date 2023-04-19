@@ -37,7 +37,7 @@ module Timescaledb
 
         def continuous_aggregates(filename)
           File.open(filename, 'a') do |file|
-            Timescaledb::Rails::ContinuousAggregate.all.each do |continuous_aggregate|
+            Timescaledb::Rails::ContinuousAggregate.dependency_ordered.each do |continuous_aggregate|
               create_continuous_aggregate_statement(continuous_aggregate, file)
               add_continuous_aggregate_policy_statement(continuous_aggregate, file)
             end
@@ -145,7 +145,7 @@ module Timescaledb
 
         # @return [Boolean]
         def timescale_enabled?
-          Timescaledb::Rails::Hypertable.table_exists?
+          ApplicationRecord.timescale_connection?(connection) && Hypertable.table_exists?
         end
       end
       # rubocop:enable Layout/LineLength

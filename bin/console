@@ -22,7 +22,7 @@ Timescaledb::Rails::Hypertable.all.each do |hypertable|
 
   Timescaledb::Rails.const_set(
     class_name,
-    Class.new(ActiveRecord::Base) do
+    Class.new(Timescaledb::Rails::ApplicationRecord) do
       include Timescaledb::Rails::Model
 
       self.table_name = [hypertable.hypertable_schema, hypertable.hypertable_name].join('.')

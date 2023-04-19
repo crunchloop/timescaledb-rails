@@ -56,7 +56,7 @@ module Timescaledb
         #
         #   disable_hypertable_compression('events')
         #
-        def disable_hypertable_compression(table_name, _segment_by: nil, _order_by: nil)
+        def disable_hypertable_compression(table_name, segment_by: nil, order_by: nil) # rubocop:disable Lint/UnusedMethodArgument
           execute "ALTER TABLE #{table_name} SET (timescaledb.compress = false);"
         end
 
@@ -116,15 +116,22 @@ module Timescaledb
         #     'temperature_events', "SELECT * FROM events where event_type = 'temperature'"
         #   )
         #
-        def create_continuous_aggregate(view_name, view_query)
-          execute "CREATE MATERIALIZED VIEW #{view_name} WITH (timescaledb.continuous) AS #{view_query};"
+        def create_continuous_aggregate(view_name, view_query, force: false)
+          if force
+            execute "DROP MATERIALIZED VIEW #{quote_table_name(view_name)} CASCADE;" if view_exists? view_name
+          else
+            schema_cache.clear_data_source_cache!(view_name.to_s)
+          end
+
+          execute "CREATE MATERIALIZED VIEW #{quote_table_name(view_name)} " \
+                  "WITH (timescaledb.continuous) AS #{view_query};"
         end
 
         # Drops a continuous aggregate
         #
         #   drop_continuous_aggregate('temperature_events')
         #
-        def drop_continuous_aggregate(view_name, _view_query = nil)
+        def drop_continuous_aggregate(view_name, _view_query = nil, force: false) # rubocop:disable Lint/UnusedMethodArgument
           execute "DROP MATERIALIZED VIEW #{view_name};"
         end
 

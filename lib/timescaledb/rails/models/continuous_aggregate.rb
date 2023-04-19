@@ -5,7 +5,7 @@ require 'timescaledb/rails/models/concerns/durationable'
 module Timescaledb
   module Rails
     # :nodoc:
-    class ContinuousAggregate < ::ActiveRecord::Base
+    class ContinuousAggregate < ApplicationRecord
       include Timescaledb::Rails::Models::Durationable
 
       self.table_name = 'timescaledb_information.continuous_aggregates'
@@ -13,13 +13,22 @@ module Timescaledb
 
       has_many :jobs, foreign_key: 'hypertable_name', class_name: 'Timescaledb::Rails::Job'
 
+      def self.dependency_ordered
+        deps = find_each.index_by(&:materialization_hypertable_name)
+
+        TSort.tsort_each(
+          ->(&b) { deps.each_value.sort_by(&:hypertable_name).each(&b) },
+          ->(n, &b) { Array.wrap(deps[n.hypertable_name]).each(&b) }
+        )
+      end
+
       # Manually refresh a continuous aggregate.
       #
       # @param [DateTime] start_time
       # @param [DateTime] end_time
       #
       def refresh!(start_time = 'NULL', end_time = 'NULL')
-        ::ActiveRecord::Base.connection.execute(
+        self.class.connection.execute(
           "CALL refresh_continuous_aggregate('#{view_name}', #{start_time}, #{end_time});"
         )
       end

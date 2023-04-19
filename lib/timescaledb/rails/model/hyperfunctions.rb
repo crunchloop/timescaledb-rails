@@ -10,12 +10,18 @@ module Timescaledb
         TIME_BUCKET_ALIAS = 'time_bucket'
 
         # @return [ActiveRecord::Relation<ActiveRecord::Base>]
-        def time_bucket(interval, target_column = nil)
-          target_column ||= hypertable_time_column_name
+        def time_bucket(interval, target_column = nil, select_alias: TIME_BUCKET_ALIAS)
+          target_column &&= Arel.sql(target_column.to_s)
+          target_column ||= arel_table[hypertable_time_column_name]
 
-          select("time_bucket('#{format_interval_value(interval)}', #{target_column}) as #{TIME_BUCKET_ALIAS}")
-            .group(TIME_BUCKET_ALIAS)
-            .order(TIME_BUCKET_ALIAS)
+          time_bucket = Arel::Nodes::NamedFunction.new(
+            'time_bucket',
+            [Arel::Nodes.build_quoted(format_interval_value(interval)), target_column]
+          )
+
+          select(time_bucket.dup.as(select_alias))
+            .group(time_bucket)
+            .order(time_bucket)
             .extending(AggregateFunctions)
         end
 

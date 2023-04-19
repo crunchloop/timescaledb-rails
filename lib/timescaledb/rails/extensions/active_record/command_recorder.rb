@@ -5,56 +5,27 @@ module Timescaledb
     module ActiveRecord
       # :nodoc:
       module CommandRecorder
-        def create_hypertable(*args, &block)
-          record(:create_hypertable, args, &block)
-        end
-
-        def enable_hypertable_compression(*args, &block)
-          record(:enable_hypertable_compression, args, &block)
-        end
-
-        def disable_hypertable_compression(*args, &block)
-          record(:disable_hypertable_compression, args, &block)
-        end
-
-        def add_hypertable_compression_policy(*args, &block)
-          record(:add_hypertable_compression_policy, args, &block)
-        end
-
-        def remove_hypertable_compression_policy(*args, &block)
-          record(:remove_hypertable_compression_policy, args, &block)
-        end
-
-        def add_hypertable_reorder_policy(*args, &block)
-          record(:add_hypertable_reorder_policy, args, &block)
-        end
-
-        def remove_hypertable_reorder_policy(*args, &block)
-          record(:remove_hypertable_reorder_policy, args, &block)
-        end
-
-        def add_hypertable_retention_policy(*args, &block)
-          record(:add_hypertable_retention_policy, args, &block)
-        end
-
-        def remove_hypertable_retention_policy(*args, &block)
-          record(:remove_hypertable_retention_policy, args, &block)
-        end
-
-        def create_continuous_aggregate(*args, &block)
-          record(:create_continuous_aggregate, args, &block)
-        end
-
-        def drop_continuous_aggregate(*args, &block)
-          record(:drop_continuous_aggregate, args, &block)
-        end
-
-        def add_continuous_aggregate_policy(*args, &block)
-          record(:add_continuous_aggregate_policy, args, &block)
-        end
-
-        def remove_continuous_aggregate_policy(*args, &block)
-          record(:remove_continuous_aggregate_policy, args, &block)
+        %w[
+          create_hypertable
+          enable_hypertable_compression
+          disable_hypertable_compression
+          add_hypertable_compression_policy
+          remove_hypertable_compression_policy
+          add_hypertable_reorder_policy
+          remove_hypertable_reorder_policy
+          add_hypertable_retention_policy
+          remove_hypertable_retention_policy
+          create_continuous_aggregate
+          drop_continuous_aggregate
+          add_continuous_aggregate_policy
+          remove_continuous_aggregate_policy
+        ].each do |method|
+          module_eval <<-METHOD, __FILE__, __LINE__ + 1
+            def #{method}(*args, &block)          # def create_table(*args, &block)
+              record(:"#{method}", args, &block)  #   record(:create_table, args, &block)
+            end                                   # end
+          METHOD
+          ruby2_keywords(method) if respond_to?(:ruby2_keywords)
         end
 
         def invert_create_hypertable(args, &block)

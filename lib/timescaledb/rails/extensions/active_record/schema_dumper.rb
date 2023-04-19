@@ -19,9 +19,9 @@ module Timescaledb
         def continuous_aggregates(stream)
           return unless timescale_enabled?
 
-          Timescaledb::Rails::ContinuousAggregate.all.each do |continuous_aggregate|
-            continuous_aggregate(continuous_aggregate, stream)
-            continuous_aggregate_policy(continuous_aggregate, stream)
+          Timescaledb::Rails::ContinuousAggregate.dependency_ordered.each do |ca|
+            continuous_aggregate(ca, stream)
+            continuous_aggregate_policy(ca, stream)
           end
         end
 
@@ -149,7 +149,7 @@ module Timescaledb
         end
 
         def timescale_enabled?
-          Timescaledb::Rails::Hypertable.table_exists?
+          ApplicationRecord.timescale_connection?(@connection) && Hypertable.table_exists?
         end
       end
     end
