@@ -1,3 +1,28 @@
+##  0.1.6 (April 19, 2023) ##
+
+*   Allow Timescale to be a non-primary Rails DB
+
+    ```ruby
+    Rails.application.configure do
+      config.after_initialize do
+        Timescaledb::Rails::ApplicationRecord.connects_to database: { writing: :timescale, reading: :timescale }
+      end
+    end
+    ```
+
+*   Decouple compression policy from the compression settings
+
+    **Before**
+    ```ruby
+    add_hypertable_compression :events, 20.days, segment_by: 'event_type, name', order_by: 'occurred_at ASC, recorded_at DESC'
+    ```
+
+    **After**
+    ```ruby
+    enable_hypertable_compression :events, segment_by: 'event_type, name', order_by: 'occurred_at ASC, recorded_at DESC'
+    add_hypertable_compression_policy :events, 20.days
+    ```
+
 ##  0.1.5 (January 24, 2023) ##
 
 *   Add continuous aggregates refresh support
