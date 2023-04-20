@@ -146,7 +146,7 @@ class Event < ActiveRecord::Base
 end
 ```
 
-Using `.find` is not recommended, to achieve more performat results, use these other find methods
+Using `.find` is not recommended, to achieve more performant results, use these other find methods
 
 ```ruby
 # When you know the exact time value
