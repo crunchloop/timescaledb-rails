@@ -290,4 +290,4 @@ Released under the MIT License.  See the [LICENSE][] file for further details.
 
 ![crunchloop](https://crunchloop.io/logo-blue.png)
 
-`timescaledb-rails` is supported with :heart: by [Crunchloop](https://crunchloop.io). We strongly believe in giving back :rocket:. Let's work together [`Get in touch`](https://crunchloop.io/contact).
+`timescaledb-rails` is supported with :heart: by [Crunchloop](https://crunchloop.io). We strongly believe in giving back :rocket:. Let's work together [`Get in touch`](https://crunchloop.io/#contact).
